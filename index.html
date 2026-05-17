@@ -3690,6 +3690,13 @@ document.getElementById('btn-export').addEventListener('click', () => {
           // Use numericValue if available, otherwise parse raw value
           let val = numVal !== null && numVal !== undefined ? numVal : parseFloat(String(rawVal).replace(/[$,%\s,]/g,''));
           if (!isNaN(val)) {
+            // Percent fields: questionnaire stores 0-100 scale (user types "50"),
+            // but the console compute functions expect 0-1 scale (0.50).
+            // Divide by 100 if the field is marked as a percent AND the value looks
+            // like it's on the 0-100 scale (i.e. value > 1 for a field that should be ≤1).
+            if (fieldData.percent === true && val > 1) {
+              val = val / 100;
+            }
             state.values[ucId][fieldId] = val;
           }
         });
