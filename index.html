@@ -3648,17 +3648,63 @@ document.getElementById('btn-export').addEventListener('click', () => {
 });
 
 // ============================================================
-// INITIALIZE — read ?useCase= param from questionnaire link
+// INITIALIZE — read ?useCase= param + import questionnaire data
 // ============================================================
 (function initFromURL() {
   try {
     const params = new URLSearchParams(window.location.search);
+
+    // 1. Activate the correct use case tab
     const ucParam = params.get('useCase');
     if (ucParam) {
       const match = USE_CASES.find(u => u.id === ucParam);
       if (match) state.activeId = match.id;
     }
-  } catch(e) { /* ignore */ }
+
+    // 2. Load questionnaire data from localStorage into state
+    // Questionnaire saves under multiple keys — try all of them
+    const importKeys = [
+      'north-appraisal-import:v1',
+      'north-appraisal-import',
+      ucParam ? 'north-appraisal-import:' + ucParam : null,
+    ].filter(Boolean);
+
+    let payload = null;
+    for (const key of importKeys) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw) { payload = JSON.parse(raw); break; }
+      } catch(e) { /* skip */ }
+    }
+
+    if (payload && payload.fields && payload.useCaseId) {
+      const ucId = payload.useCaseId;
+      const uc   = USE_CASES.find(u => u.id === ucId);
+      if (uc) {
+        state.activeId = ucId;
+        // Populate state.values with the imported field values
+        if (!state.values[ucId]) state.values[ucId] = {};
+        Object.entries(payload.fields).forEach(([fieldId, fieldData]) => {
+          const numVal = fieldData.numericValue;
+          const rawVal = fieldData.value;
+          // Use numericValue if available, otherwise parse raw value
+          let val = numVal !== null && numVal !== undefined ? numVal : parseFloat(String(rawVal).replace(/[$,%\s,]/g,''));
+          if (!isNaN(val)) {
+            state.values[ucId][fieldId] = val;
+          }
+        });
+
+        // Show a brief import notice
+        setTimeout(() => {
+          const notice = document.createElement('div');
+          notice.style.cssText = 'position:fixed;top:16px;right:16px;background:#1F3A2E;color:#E8A34D;border:1px solid #E8A34D;border-radius:6px;padding:10px 16px;font-size:12px;font-family:inherit;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.4)';
+          notice.textContent = '✓ Questionnaire data loaded — ' + (uc.name || ucId);
+          document.body.appendChild(notice);
+          setTimeout(() => notice.remove(), 3500);
+        }, 600);
+      }
+    }
+  } catch(e) { console.warn('Import error:', e); }
 })();
 renderAll();
 
