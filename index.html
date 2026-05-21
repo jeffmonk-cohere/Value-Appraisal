@@ -2026,6 +2026,10 @@ const TAXONOMY = {
       { name: 'Safety incident agent',            priority:'High',   agentType:'Workflow Automation',   kpis:'TRIR reduction %, investigation cycle time, CAPEX stop-work avoided',   valueDriver:'Risk & Compliance',              modelId: 'safety' },
       { name: 'Workforce operations agent',       priority:'Medium', agentType:'Workflow Automation',   kpis:'Time-to-fill days, cert gap rate, training waste reduction',            valueDriver:'Cost Reduction / Efficiency',    modelId: 'workforce' },
       { name: 'Job planning agent',               priority:'Medium', agentType:'Workflow Automation',   kpis:'Planner hrs/job, first-pass rate, NPT from plan defects',              valueDriver:'Cost Reduction / Efficiency',    modelId: 'jobplan' },
+      { name: 'Lease & title document intelligence', priority:'High',   agentType:'Document AI',           kpis:'Abstraction hrs/doc, outside counsel cost, discrepancies detected, DD curative cost', valueDriver:'Cost Reduction / Efficiency', modelId: 'leasetitle' },
+      { name: 'JOA & contract clause comparison',    priority:'High',   agentType:'Document AI',           kpis:'Legal review hrs/contract, outside counsel spend, non-consent exposure, nego cycle days', valueDriver:'Cost Reduction / Efficiency', modelId: 'joaclause' },
+      { name: 'Landman copilot / Q&A',               priority:'High',   agentType:'AI Assistant',          kpis:'Query cycle time, land staff hrs saved, lease expiration avoidance',  valueDriver:'Cost Reduction / Efficiency',    modelId: 'landmanqa'  },
+      { name: 'A&D diligence acceleration',          priority:'High',   agentType:'Document AI',           kpis:'DD cycle time, outside counsel savings, R&W exposure reduction',       valueDriver:'Cost Reduction / Efficiency',    modelId: 'addiligence' },
     ]
   },
   midstream: {
@@ -2973,6 +2977,410 @@ const UC_NUCDOC = {
   },
 };
 
+
+// ============================================================
+// USE CASE 16: LEASE & TITLE DOCUMENT INTELLIGENCE (Upstream)
+// ============================================================
+// Scope: Mid-size E&P operator with active land department.
+// Agent extracts structured data from scanned leases, assignments,
+// ratifications, amendments, and title opinions into the land system
+// of record — and continuously reconciles documents vs. system data,
+// flagging discrepancies before they surface in divestiture DD.
+//
+const UC_LEASETITLE = {
+  id: 'leasetitle',
+  icon: Icons.jobplan,
+  name: 'Lease & Title Document Intelligence',
+  meta: 'Upstream · Land',
+  title: 'Lease & Title <em>Document Intelligence</em>',
+  eyebrow: 'Use Case · 16',
+  description: 'AI agent extracts structured data from scanned leases, assignments, ratifications, amendments, memoranda, and title opinions — normalizing lessor/lessee, legal description, royalty rate, primary term, Pugh clauses, depth severances, shut-in provisions, and continuous development obligations into the land system of record. Continuous reconciliation between the system and underlying documents flags discrepancies before they surface during divestiture due diligence.',
+  sections: [
+    { title: 'Land Department Scale', inputs: [
+      { id: 'land_ftes',        label: 'Land department FTEs (landmen + analysts)', default: 28,      unit: 'FTEs',     key: true },
+      { id: 'land_rate',        label: 'Fully-loaded landman $/hr',                default: 95,      unit: '$/hr',     key: true },
+      { id: 'doc_corpus',       label: 'Total lease/title documents in portfolio', default: 75000,   unit: 'docs',     key: true },
+      { id: 'new_docs_yr',      label: 'New documents added per year',             default: 8000,    unit: 'docs/yr'             },
+    ]},
+    { title: 'Abstraction Labor Savings', inputs: [
+      { id: 'abstraction_pct',  label: '% of land staff time on manual abstraction', default: 0.30,  unit: '%', pct: true, key: true },
+      { id: 'abstraction_red',  label: 'Abstraction time reduction (agent)',          default: 0.65,  unit: '%', pct: true, key: true },
+      { id: 'outside_abstract', label: 'Annual outside abstractor spend',            default: 420000, unit: '$',          key: true },
+      { id: 'outside_red',      label: 'Outside abstractor cost reduction',          default: 0.70,   unit: '%', pct: true           },
+    ]},
+    { title: 'Title Curative & Discrepancy Detection', inputs: [
+      { id: 'discrepancy_rate', label: 'Estimated % of records with data discrepancies', default: 0.12, unit: '%', pct: true, key: true },
+      { id: 'curative_cost',    label: 'Avg curative cost per discrepancy found late',   default: 18000, unit: '$'                      },
+      { id: 'curative_red',     label: 'Discrepancies caught early vs. DD (agent)',      default: 0.55,  unit: '%', pct: true, key: true },
+      { id: 'dd_events_yr',     label: 'Divestiture / acquisition events per year',      default: 2,     unit: 'events'                  },
+      { id: 'dd_curative_cost', label: 'Avg title curative cost per A/D event (baseline)', default: 350000, unit: '$', key: true         },
+      { id: 'dd_curative_red',  label: 'Curative cost reduction per A/D (agent)',        default: 0.40,  unit: '%', pct: true            },
+    ]},
+    { title: 'System of Record Efficiency', inputs: [
+      { id: 'entry_hrs_base',   label: 'Landman hrs to abstract & enter one document (baseline)', default: 1.8, unit: 'hrs', key: true },
+      { id: 'entry_hrs_future', label: 'Landman hrs per document (agent-assisted)',                default: 0.3, unit: 'hrs', key: true },
+    ]},
+    { title: 'Cohere North Platform', inputs: [
+      { id: 'users_y1', label: 'Users — Year 1', default: 50,    unit: 'users', key: true },
+      { id: 'users_y2', label: 'Users — Year 2', default: 250,   unit: 'users', key: true },
+      { id: 'users_y3', label: 'Users — Year 3', default: 600,   unit: 'users', key: true },
+      { id: 'fee_y1',   label: 'Cohere fee — Year 1', default: 200000,  unit: '$', key: true },
+      { id: 'fee_y2',   label: 'Cohere fee — Year 2', default: 900000,  unit: '$', key: true },
+      { id: 'fee_y3',   label: 'Cohere fee — Year 3', default: 2200000, unit: '$', key: true },
+      { id: 'rf_y1',    label: 'Value realization — Y1', default: 0.40, unit: '%', pct: true, key: true },
+      { id: 'rf_y2',    label: 'Value realization — Y2', default: 0.75, unit: '%', pct: true, key: true },
+      { id: 'rf_y3',    label: 'Value realization — Y3', default: 1.00, unit: '%', pct: true, key: true },
+    ]},
+  ],
+  compute(i) {
+    // DRIVER 1: Internal abstraction labor savings
+    const abstractBase = i.land_ftes * 2000 * i.abstraction_pct * i.abstraction_red * i.land_rate;
+
+    // DRIVER 2: Outside abstractor cost avoidance
+    const outsideBase = i.outside_abstract * i.outside_red;
+
+    // DRIVER 3: Per-document entry efficiency (new docs)
+    const docEffBase = i.new_docs_yr * (i.entry_hrs_base - i.entry_hrs_future) * i.land_rate;
+
+    // DRIVER 4: Title curative — early detection saves late-stage cost
+    const curativeBase = i.doc_corpus * i.discrepancy_rate * i.curative_red * i.curative_cost * 0.10; // 10% of corpus re-verified/yr
+
+    // DRIVER 5: A/D divestiture curative cost reduction
+    const ddBase = i.dd_events_yr * i.dd_curative_cost * i.dd_curative_red;
+
+    const years = [
+      { rf: i.rf_y1, users: i.users_y1, fee: i.fee_y1 },
+      { rf: i.rf_y2, users: i.users_y2, fee: i.fee_y2 },
+      { rf: i.rf_y3, users: i.users_y3, fee: i.fee_y3 },
+    ];
+    const rows = years.map(y => ({
+      abstraction: abstractBase * y.rf,
+      outside:     outsideBase  * y.rf,
+      doceff:      docEffBase   * y.rf,
+      curative:    curativeBase * y.rf,
+      ddcurative:  ddBase       * y.rf,
+      users: y.users, fee: y.fee,
+    }));
+    rows.forEach(r => {
+      r.gross = r.abstraction + r.outside + r.doceff + r.curative + r.ddcurative;
+      r.net   = r.gross - r.fee;
+      r.roi   = r.gross / (r.fee || 1);
+    });
+    return {
+      years: rows,
+      drivers: [
+        { name: 'Internal abstraction labor savings', key: 'abstraction' },
+        { name: 'Outside abstractor cost avoidance',  key: 'outside'     },
+        { name: 'Per-document entry efficiency',      key: 'doceff'      },
+        { name: 'Title curative — early detection',   key: 'curative'    },
+        { name: 'A/D divestiture curative savings',   key: 'ddcurative'  },
+      ],
+      context: {
+        docsPerYear: i.new_docs_yr,
+        hrsSavedPerDoc: Math.round((i.entry_hrs_base - i.entry_hrs_future) * 10) / 10,
+        discrepanciesDetected: Math.round(i.doc_corpus * i.discrepancy_rate * i.curative_red * 0.10),
+      },
+    };
+  },
+};
+
+
+// ============================================================
+// USE CASE 17: JOA & CONTRACT CLAUSE COMPARISON (Upstream)
+// ============================================================
+// Scope: E&P legal / land department reviewing JOAs, JDAs, farmouts,
+// AMIs, surface use agreements, ROW agreements, SWD contracts.
+// Agent builds a clause library, compares new drafts against operator
+// preferred positions, flags deviations from AAPL model form, and
+// surfaces non-standard provisions.
+//
+const UC_JOACLAUSE = {
+  id: 'joaclause',
+  icon: Icons.jobplan,
+  name: 'JOA & Contract Clause Comparison',
+  meta: 'Upstream · Land / Legal',
+  title: 'JOA & Contract <em>Clause Comparison</em>',
+  eyebrow: 'Use Case · 17',
+  description: 'Agent builds a clause library from the operator\'s executed JOA portfolio, compares new drafts against preferred positions and AAPL model form standards, and flags non-standard provisions — particularly non-consent penalties, AMI scope, area of operations definitions, and operatorship transfer triggers. Applicable to JOAs, JDAs, farmouts, AMIs, surface use agreements, ROW agreements, and SWD contracts.',
+  sections: [
+    { title: 'Contract Volume & Legal Scale', inputs: [
+      { id: 'contracts_reviewed_yr', label: 'Contracts reviewed / negotiated per year', default: 85,      unit: 'contracts', key: true },
+      { id: 'inside_counsel_ftes',   label: 'Inside counsel FTEs covering land contracts', default: 4,    unit: 'FTEs'                },
+      { id: 'inside_rate',           label: 'Fully-loaded inside counsel $/hr',            default: 185,   unit: '$/hr'                },
+      { id: 'outside_counsel_spend', label: 'Annual outside counsel spend on land contracts', default: 1200000, unit: '$', key: true  },
+    ]},
+    { title: 'Legal Review Efficiency', inputs: [
+      { id: 'hrs_per_contract_base',   label: 'Attorney hours per contract review (baseline)', default: 12.0, unit: 'hrs', key: true },
+      { id: 'hrs_per_contract_future', label: 'Attorney hours per contract review (agent)',    default: 4.5,  unit: 'hrs', key: true },
+      { id: 'outside_review_share',    label: '% of reviews sent to outside counsel',          default: 0.35, unit: '%', pct: true, key: true },
+      { id: 'outside_rate',            label: 'Outside counsel blended $/hr (land matters)',   default: 475,  unit: '$/hr'               },
+      { id: 'outside_red',             label: 'Outside counsel time reduction (agent)',         default: 0.45, unit: '%', pct: true       },
+    ]},
+    { title: 'Non-Standard Clause Risk Reduction', inputs: [
+      { id: 'non_consent_exposure',  label: 'Estimated annual non-consent penalty exposure',  default: 850000,  unit: '$', key: true },
+      { id: 'clause_risk_red',       label: 'Risk exposure reduction (better clause detection)', default: 0.30, unit: '%', pct: true, key: true },
+      { id: 'nego_cycle_days_base',  label: 'Avg contract negotiation cycle (days, baseline)', default: 28,    unit: 'days'              },
+      { id: 'nego_cycle_days_future','label': 'Avg contract negotiation cycle (days, agent)',  default: 14,    unit: 'days', key: true   },
+      { id: 'cycle_value_day',       label: 'Business value per day faster negotiation',       default: 8500,  unit: '$'                 },
+    ]},
+    { title: 'Cohere North Platform', inputs: [
+      { id: 'users_y1', label: 'Users — Year 1', default: 50,    unit: 'users', key: true },
+      { id: 'users_y2', label: 'Users — Year 2', default: 250,   unit: 'users', key: true },
+      { id: 'users_y3', label: 'Users — Year 3', default: 600,   unit: 'users', key: true },
+      { id: 'fee_y1',   label: 'Cohere fee — Year 1', default: 200000,  unit: '$', key: true },
+      { id: 'fee_y2',   label: 'Cohere fee — Year 2', default: 900000,  unit: '$', key: true },
+      { id: 'fee_y3',   label: 'Cohere fee — Year 3', default: 2200000, unit: '$', key: true },
+      { id: 'rf_y1',    label: 'Value realization — Y1', default: 0.40, unit: '%', pct: true, key: true },
+      { id: 'rf_y2',    label: 'Value realization — Y2', default: 0.75, unit: '%', pct: true, key: true },
+      { id: 'rf_y3',    label: 'Value realization — Y3', default: 1.00, unit: '%', pct: true, key: true },
+    ]},
+  ],
+  compute(i) {
+    // DRIVER 1: Inside counsel labor savings
+    const hrsSaved = i.hrs_per_contract_base - i.hrs_per_contract_future;
+    const insideReviews = i.contracts_reviewed_yr * (1 - i.outside_review_share);
+    const insideBase = insideReviews * hrsSaved * i.inside_rate;
+
+    // DRIVER 2: Outside counsel cost reduction
+    const outsideReviews = i.contracts_reviewed_yr * i.outside_review_share;
+    const outsideBase = outsideReviews * hrsSaved * i.outside_rate * i.outside_red;
+
+    // DRIVER 3: Non-standard clause risk reduction
+    const clauseRiskBase = i.non_consent_exposure * i.clause_risk_red;
+
+    // DRIVER 4: Negotiation cycle time value
+    const daysSaved = i.nego_cycle_days_base - i.nego_cycle_days_future;
+    const cycleBase = i.contracts_reviewed_yr * daysSaved * i.cycle_value_day;
+
+    const years = [
+      { rf: i.rf_y1, users: i.users_y1, fee: i.fee_y1 },
+      { rf: i.rf_y2, users: i.users_y2, fee: i.fee_y2 },
+      { rf: i.rf_y3, users: i.users_y3, fee: i.fee_y3 },
+    ];
+    const rows = years.map(y => ({
+      inside:     insideBase    * y.rf,
+      outside:    outsideBase   * y.rf,
+      clauserisk: clauseRiskBase * y.rf,
+      cycle:      cycleBase     * y.rf,
+      users: y.users, fee: y.fee,
+    }));
+    rows.forEach(r => {
+      r.gross = r.inside + r.outside + r.clauserisk + r.cycle;
+      r.net   = r.gross - r.fee;
+      r.roi   = r.gross / (r.fee || 1);
+    });
+    return {
+      years: rows,
+      drivers: [
+        { name: 'Inside counsel labor savings',    key: 'inside'     },
+        { name: 'Outside counsel cost reduction',  key: 'outside'    },
+        { name: 'Non-standard clause risk reduction', key: 'clauserisk' },
+        { name: 'Negotiation cycle time value',    key: 'cycle'      },
+      ],
+      context: {
+        hrsSaved,
+        contractsReviewed: i.contracts_reviewed_yr,
+        daysSaved,
+      },
+    };
+  },
+};
+
+
+// ============================================================
+// USE CASE 18: LANDMAN COPILOT / Q&A (Upstream)
+// ============================================================
+// Scope: E&P land department — landmen, land analysts, reservoir
+// engineers querying the full lease and title document corpus via
+// natural language. On-premise / VPC deployment keeps all documents
+// within the operator's environment.
+//
+const UC_LANDMANQA = {
+  id: 'landmanqa',
+  icon: Icons.field,
+  name: 'Landman Copilot / Q&A',
+  meta: 'Upstream · Land',
+  title: 'Landman <em>Copilot</em> / Q&A',
+  eyebrow: 'Use Case · 18',
+  description: 'Conversational interface over the operator\'s full land document corpus — leases, title opinions, JOAs, division orders, and correspondence. Landmen and reservoir engineers query natural language questions like "What\'s our deepest-rights position in Section 14, Block A-2, Reeves County?" or "Show me all leases in our Delaware position with Pugh clauses that haven\'t been satisfied." Secure on-premise deployment ensures documents never leave the operator\'s environment.',
+  sections: [
+    { title: 'Land Staff Scale', inputs: [
+      { id: 'land_ftes',       label: 'Land staff using the copilot (FTEs)',          default: 32,   unit: 'FTEs',  key: true },
+      { id: 'eng_ftes',        label: 'Engineers/geoscientists also using copilot',   default: 20,   unit: 'FTEs'              },
+      { id: 'land_rate',       label: 'Fully-loaded landman $/hr',                   default: 95,   unit: '$/hr',  key: true },
+      { id: 'eng_rate',        label: 'Fully-loaded engineer $/hr',                  default: 140,  unit: '$/hr'              },
+    ]},
+    { title: 'Research & Query Time Savings', inputs: [
+      { id: 'queries_per_day',      label: 'Land/title queries per person per day (baseline)', default: 5.5,  unit: 'queries', key: true },
+      { id: 'mins_per_query_base',  label: 'Avg minutes per query — baseline',                default: 28,   unit: 'min',     key: true },
+      { id: 'mins_per_query_future','label': 'Avg minutes per query — agent-assisted',        default: 3,    unit: 'min',     key: true },
+      { id: 'search_capture',       label: 'Time savings capture factor',                     default: 0.50, unit: '%', pct: true      },
+      { id: 'working_days',         label: 'Working days per year',                           default: 235,  unit: 'days'              },
+    ]},
+    { title: 'Decision Quality & Compliance', inputs: [
+      { id: 'compliance_hrs',  label: 'Land staff hrs/yr on regulatory & compliance reporting (% of total)', default: 0.10, unit: '%', pct: true },
+      { id: 'compliance_red',  label: 'Compliance prep time reduction (faster access)',                      default: 0.45, unit: '%', pct: true, key: true },
+      { id: 'lease_exp_value', label: 'Estimated value of lease expirations avoided per year (better monitoring)', default: 500000, unit: '$', key: true },
+    ]},
+    { title: 'Cohere North Platform', inputs: [
+      { id: 'users_y1', label: 'Users — Year 1', default: 50,    unit: 'users', key: true },
+      { id: 'users_y2', label: 'Users — Year 2', default: 250,   unit: 'users', key: true },
+      { id: 'users_y3', label: 'Users — Year 3', default: 600,   unit: 'users', key: true },
+      { id: 'fee_y1',   label: 'Cohere fee — Year 1', default: 150000,  unit: '$', key: true },
+      { id: 'fee_y2',   label: 'Cohere fee — Year 2', default: 700000,  unit: '$', key: true },
+      { id: 'fee_y3',   label: 'Cohere fee — Year 3', default: 1800000, unit: '$', key: true },
+      { id: 'rf_y1',    label: 'Value realization — Y1', default: 0.40, unit: '%', pct: true, key: true },
+      { id: 'rf_y2',    label: 'Value realization — Y2', default: 0.75, unit: '%', pct: true, key: true },
+      { id: 'rf_y3',    label: 'Value realization — Y3', default: 1.00, unit: '%', pct: true, key: true },
+    ]},
+  ],
+  compute(i) {
+    const totalFTE = i.land_ftes + i.eng_ftes;
+    const blendedRate = (i.land_ftes * i.land_rate + i.eng_ftes * i.eng_rate) / (totalFTE || 1);
+
+    // DRIVER 1: Query time savings
+    const hrsSavedPerDay = (i.mins_per_query_base - i.mins_per_query_future) / 60 * i.queries_per_day;
+    const searchBase = i.land_ftes * hrsSavedPerDay * i.working_days * i.land_rate * i.search_capture
+                     + i.eng_ftes  * hrsSavedPerDay * i.working_days * i.eng_rate  * i.search_capture;
+
+    // DRIVER 2: Compliance prep efficiency
+    const compBase = i.land_ftes * 2000 * i.compliance_hrs * i.compliance_red * i.land_rate;
+
+    // DRIVER 3: Lease expiration avoidance
+    const leaseBase = i.lease_exp_value;
+
+    const years = [
+      { rf: i.rf_y1, users: i.users_y1, fee: i.fee_y1 },
+      { rf: i.rf_y2, users: i.users_y2, fee: i.fee_y2 },
+      { rf: i.rf_y3, users: i.users_y3, fee: i.fee_y3 },
+    ];
+    const rows = years.map(y => ({
+      search:     searchBase * y.rf,
+      compliance: compBase   * y.rf,
+      leaseexp:   leaseBase  * y.rf,
+      users: y.users, fee: y.fee,
+    }));
+    rows.forEach(r => {
+      r.gross = r.search + r.compliance + r.leaseexp;
+      r.net   = r.gross - r.fee;
+      r.roi   = r.gross / (r.fee || 1);
+    });
+    return {
+      years: rows,
+      drivers: [
+        { name: 'Query time savings',          key: 'search'     },
+        { name: 'Compliance prep efficiency',  key: 'compliance' },
+        { name: 'Lease expiration avoidance',  key: 'leaseexp'   },
+      ],
+      context: {
+        totalFTE,
+        hrsSavedPerDay: Math.round(hrsSavedPerDay * 10) / 10,
+        blendedRate: Math.round(blendedRate),
+      },
+    };
+  },
+};
+
+
+// ============================================================
+// USE CASE 19: A&D DILIGENCE ACCELERATION (Upstream)
+// ============================================================
+// Scope: E&P A/D team running acquisitions and divestitures.
+// Agent ingests a data room, builds a lease summary table, flags
+// consent-to-assign provisions, identifies preferential rights,
+// and surfaces change-of-control triggers — compressing weeks of
+// outside counsel and landman review into days.
+//
+const UC_ADDILIGENCE = {
+  id: 'addiligence',
+  icon: Icons.mro,
+  name: 'A&D Diligence Acceleration',
+  meta: 'Upstream · Land / BD',
+  title: 'A&D Diligence <em>Acceleration</em>',
+  eyebrow: 'Use Case · 19',
+  description: 'Agent ingests acquisition and divestiture data rooms, builds structured lease summary tables, flags consent-to-assign provisions, identifies preferential rights to purchase, and surfaces change-of-control triggers across the entire contract portfolio — compressing what typically takes outside counsel and landmen several weeks into days. Enables faster bid decisions, lower transaction costs, and higher-confidence representations and warranties.',
+  sections: [
+    { title: 'A&D Activity Volume', inputs: [
+      { id: 'ad_deals_yr',        label: 'A&D transactions evaluated per year',         default: 5,       unit: 'deals',  key: true },
+      { id: 'deals_closed_yr',    label: 'Deals that close (signed LOI / PSA)',         default: 2,       unit: 'deals'              },
+      { id: 'docs_per_deal',      label: 'Avg documents per data room',                 default: 12000,   unit: 'docs',   key: true },
+      { id: 'deal_value_avg',     label: 'Avg transaction value',                       default: 500000000, unit: '$',    key: true },
+    ]},
+    { title: 'Outside Counsel & Landman Costs', inputs: [
+      { id: 'outside_counsel_dd', label: 'Outside counsel spend per deal DD (baseline)', default: 650000, unit: '$',      key: true },
+      { id: 'outside_red',        label: 'Outside counsel cost reduction (agent)',        default: 0.40,   unit: '%', pct: true, key: true },
+      { id: 'landman_hrs_deal',   label: 'Internal landman hours per deal (baseline)',   default: 320,    unit: 'hrs',    key: true },
+      { id: 'landman_rate',       label: 'Fully-loaded landman $/hr',                    default: 95,     unit: '$/hr'               },
+      { id: 'landman_red',        label: 'Landman hours reduction (agent)',               default: 0.50,   unit: '%', pct: true       },
+    ]},
+    { title: 'Cycle Time & Deal Quality', inputs: [
+      { id: 'dd_days_base',       label: 'Diligence cycle time (days, baseline)',        default: 35,     unit: 'days',   key: true },
+      { id: 'dd_days_future',     label: 'Diligence cycle time (days, agent)',           default: 14,     unit: 'days',   key: true },
+      { id: 'cycle_value_day',    label: 'Value per day faster close (financing, hedging, ops)', default: 45000, unit: '$'      },
+      { id: 'rw_exposure',        label: 'Estimated R&W / title exposure per deal (baseline)', default: 2500000, unit: '$', key: true },
+      { id: 'rw_red',             label: 'R&W exposure reduction (better flag detection)',     default: 0.25,   unit: '%', pct: true, key: true },
+    ]},
+    { title: 'Cohere North Platform', inputs: [
+      { id: 'users_y1', label: 'Users — Year 1', default: 50,    unit: 'users', key: true },
+      { id: 'users_y2', label: 'Users — Year 2', default: 250,   unit: 'users', key: true },
+      { id: 'users_y3', label: 'Users — Year 3', default: 600,   unit: 'users', key: true },
+      { id: 'fee_y1',   label: 'Cohere fee — Year 1', default: 200000,  unit: '$', key: true },
+      { id: 'fee_y2',   label: 'Cohere fee — Year 2', default: 900000,  unit: '$', key: true },
+      { id: 'fee_y3',   label: 'Cohere fee — Year 3', default: 2200000, unit: '$', key: true },
+      { id: 'rf_y1',    label: 'Value realization — Y1', default: 0.40, unit: '%', pct: true, key: true },
+      { id: 'rf_y2',    label: 'Value realization — Y2', default: 0.75, unit: '%', pct: true, key: true },
+      { id: 'rf_y3',    label: 'Value realization — Y3', default: 1.00, unit: '%', pct: true, key: true },
+    ]},
+  ],
+  compute(i) {
+    // DRIVER 1: Outside counsel savings
+    const outsideBase = i.ad_deals_yr * i.outside_counsel_dd * i.outside_red;
+
+    // DRIVER 2: Internal landman time savings
+    const landmanBase = i.ad_deals_yr * i.landman_hrs_deal * i.landman_red * i.landman_rate;
+
+    // DRIVER 3: Cycle time acceleration value
+    const daysSaved = i.dd_days_base - i.dd_days_future;
+    const cycleBase = i.deals_closed_yr * daysSaved * i.cycle_value_day;
+
+    // DRIVER 4: R&W / title exposure reduction on closed deals
+    const rwBase = i.deals_closed_yr * i.rw_exposure * i.rw_red;
+
+    const years = [
+      { rf: i.rf_y1, users: i.users_y1, fee: i.fee_y1 },
+      { rf: i.rf_y2, users: i.users_y2, fee: i.fee_y2 },
+      { rf: i.rf_y3, users: i.users_y3, fee: i.fee_y3 },
+    ];
+    const rows = years.map(y => ({
+      outside:  outsideBase * y.rf,
+      landman:  landmanBase * y.rf,
+      cycle:    cycleBase   * y.rf,
+      rw:       rwBase      * y.rf,
+      users: y.users, fee: y.fee,
+    }));
+    rows.forEach(r => {
+      r.gross = r.outside + r.landman + r.cycle + r.rw;
+      r.net   = r.gross - r.fee;
+      r.roi   = r.gross / (r.fee || 1);
+    });
+    return {
+      years: rows,
+      drivers: [
+        { name: 'Outside counsel cost savings',      key: 'outside'  },
+        { name: 'Internal landman time savings',     key: 'landman'  },
+        { name: 'Deal cycle time acceleration',      key: 'cycle'    },
+        { name: 'R&W / title exposure reduction',    key: 'rw'       },
+      ],
+      context: {
+        daysSaved,
+        dealsEvaluated: i.ad_deals_yr,
+        dealsClosed: i.deals_closed_yr,
+        outsideSavingsPerDeal: Math.round(i.outside_counsel_dd * i.outside_red),
+      },
+    };
+  },
+};
+
 // Map modelId to sector for tab activation
 const MODEL_SECTOR = {
   field: 'upstream', safety: 'upstream', prod: 'upstream',
@@ -2980,6 +3388,7 @@ const MODEL_SECTOR = {
   crude: 'midstream',
   revprot: 'power', billinq: 'power', payrisk: 'power', billex: 'power',
   nucspare: 'power', nucdata: 'power', nuctrouble: 'power', nucdoc: 'power',
+  leasetitle: 'upstream', joaclause: 'upstream', landmanqa: 'upstream', addiligence: 'upstream',
 };
 
 const USE_CASES = [
@@ -2987,6 +3396,7 @@ const USE_CASES = [
   UC_CRUDE,
   UC_REVPROT, UC_BILLINQ, UC_PAYRISK, UC_BILLEX,
   UC_NUCSPARE, UC_NUCDATA, UC_NUCTROUBLE, UC_NUCDOC,
+  UC_LEASETITLE, UC_JOACLAUSE, UC_LANDMANQA, UC_ADDILIGENCE,
 ];
 
 // ============================================================
@@ -3406,6 +3816,14 @@ function renderResults() {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> Total billing calls/yr: <strong>${fmtNum(result.context.totalCalls)}</strong> · Calls deflected/yr: <strong>${fmtNum(result.context.deflectedCalls)}</strong> · Repeat contacts avoided/yr: <strong>${fmtNum(result.context.repeatsAvoided)}</strong>. Call deflection is the largest driver; first-contact resolution improvement has significant long-term customer satisfaction value not captured here.</div>`;
   } else if (uc.id === 'payrisk') {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> Bad debt exposure: <strong>${fmtUSD(result.context.badDebtExposure)}</strong> · Delinquent accounts/yr: <strong>${fmtNum(result.context.delinqAccounts)}</strong> · Disconnections avoided/yr: <strong>${fmtNum(result.context.dcAvoided)}</strong>. Bad debt reduction is the dominant driver. Conservative: excludes customer lifetime value improvement from avoided disconnection and improved payment relationship.</div>`;
+  } else if (uc.id === 'leasetitle') {
+    caveatHTML = `<div class="caveat"><strong>Context:</strong> New docs/yr: <strong>${fmtNum(result.context.docsPerYear)}</strong> · Hrs saved per document: <strong>${fmtNum(result.context.hrsSavedPerDoc, 1)}</strong> · Discrepancies detected early/yr: <strong>${fmtNum(result.context.discrepanciesDetected)}</strong>. Internal abstraction labor is the largest driver. Y1 at 40% reflects integration time with land system of record (Quorum, Enverus, P2 Tobin). Conservative: excludes value of continuous reconciliation catch rate improving over time as the model trains on the corpus.</div>`;
+  } else if (uc.id === 'joaclause') {
+    caveatHTML = `<div class="caveat"><strong>Context:</strong> Contracts reviewed/yr: <strong>${fmtNum(result.context.contractsReviewed)}</strong> · Hours saved per contract: <strong>${fmtNum(result.context.hrsSaved, 1)}</strong> · Days saved per negotiation: <strong>${fmtNum(result.context.daysSaved)}</strong>. Outside counsel cost reduction is the largest single driver for operators with active outside counsel relationships. Non-consent penalty exposure reduction is the most conservative driver — actual exposure depends on portfolio concentration. Excluded: value of standardized clause library for training junior landmen and attorneys.</div>`;
+  } else if (uc.id === 'landmanqa') {
+    caveatHTML = `<div class="caveat"><strong>Context:</strong> Total FTEs: <strong>${fmtNum(result.context.totalFTE)}</strong> · Query time saved per person/day: <strong>${fmtNum(result.context.hrsSavedPerDay, 1)} hrs</strong> · Blended rate: <strong>$${fmtNum(result.context.blendedRate)}/hr</strong>. Query time savings dominate at 50% capture factor. Lease expiration avoidance is the most variable driver — calibrate against your actual lease expiration history. Conservative: excludes value of better-informed drilling and spacing decisions enabled by faster rights position lookup.</div>`;
+  } else if (uc.id === 'addiligence') {
+    caveatHTML = `<div class="caveat"><strong>Context:</strong> Deals evaluated/yr: <strong>${fmtNum(result.context.dealsEvaluated)}</strong> · Deals closed/yr: <strong>${fmtNum(result.context.dealsClosed)}</strong> · Cycle time saved: <strong>${fmtNum(result.context.daysSaved)} days</strong> · Outside savings per deal: <strong>${fmtUSD(result.context.outsideSavingsPerDeal)}</strong>. Outside counsel savings is the largest driver and highly sensitive to deal volume. R&W exposure reduction is conservative — actual exposure depends on deal structure and representations made. Excluded: optionality value of being able to evaluate more deals in the same time window.</div>`;
   } else if (uc.id === 'nucspare') {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> Annual carrying cost savings: <strong>${fmtUSD(result.context.annualCarryingSaved)}</strong> · Stockouts avoided/yr: <strong>${fmtNum(result.context.stockoutsAvoided)}</strong> · Emergency orders avoided: <strong>${fmtNum(result.context.emergOrdersAvoided)}/yr</strong>. Outage extension avoidance is highest-leverage — one avoided day at $1.2M replacement power exceeds months of inventory savings. Y1 realization at 40% reflects longer nuclear procurement system integration cycles. Excluded: insurance premium reduction, regulatory traceability improvements.</div>`;
   } else if (uc.id === 'nucdata') {
