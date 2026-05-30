@@ -2030,6 +2030,10 @@ const TAXONOMY = {
       { name: 'JOA & contract clause comparison',    priority:'High',   agentType:'Document AI',           kpis:'Legal review hrs/contract, outside counsel spend, non-consent exposure, nego cycle days', valueDriver:'Cost Reduction / Efficiency', modelId: 'joaclause' },
       { name: 'Landman copilot / Q&A',               priority:'High',   agentType:'AI Assistant',          kpis:'Query cycle time, land staff hrs saved, lease expiration avoidance',  valueDriver:'Cost Reduction / Efficiency',    modelId: 'landmanqa'  },
       { name: 'A&D diligence acceleration',          priority:'High',   agentType:'Document AI',           kpis:'DD cycle time, outside counsel savings, R&W exposure reduction',       valueDriver:'Cost Reduction / Efficiency',    modelId: 'addiligence' },
+      { name: 'Rig downtime & NPT intelligence',     priority:'High',   agentType:'ML / Reliability',  kpis:'NPT hours avoided, DDR automation hrs, BOP failure prediction rate',    valueDriver:'Revenue / Production Uplift',    modelId: 'npti'       },
+      { name: 'Contract & dayrate intelligence',     priority:'High',   agentType:'Document AI',       kpis:'Contract review hrs, suspension exposure, dayrate opportunity capture',  valueDriver:'Cost Reduction / Efficiency',    modelId: 'contractdr' },
+      { name: 'FPSO uptime & predictive maintenance',priority:'High',   agentType:'ML / Reliability',  kpis:'Uptime %, unplanned shutdowns avoided, maintenance cost reduction',     valueDriver:'Revenue / Production Uplift',    modelId: 'fpsoupt'    },
+      { name: 'FPSO O&M knowledge management',      priority:'High',   agentType:'AI Assistant',      kpis:'Search cycle time, handover error rate, cross-fleet lessons captured',  valueDriver:'Cost Reduction / Efficiency',    modelId: 'fpsoknow'   },
     ]
   },
   midstream: {
@@ -2136,10 +2140,7 @@ const TAXONOMY = {
       { name: 'Workforce demand forecasting',       priority:'Medium', agentType:'Analytics',         kpis:'Forecast accuracy %, skills gap identified, planning cycle time',       valueDriver:'Cost Reduction / Efficiency',    modelId: null },
       { name: 'Learning & competency gap analysis', priority:'Medium', agentType:'Analytics',         kpis:'Competency gap closure rate, training completion %, internal mobility', valueDriver:'Cost Reduction / Efficiency',    modelId: null },
       { name: 'Safety training compliance tracking', priority:'Medium', agentType:'Compliance',       kpis:'Training compliance rate %, non-compliance incidents',                  valueDriver:'Risk & Compliance',              modelId: null },
-      { name: 'Rig downtime & NPT intelligence',     priority:'High',   agentType:'ML / Reliability',  kpis:'NPT hours avoided, DDR automation hrs, BOP failure prediction rate',    valueDriver:'Revenue / Production Uplift',    modelId: 'npti'       },
-      { name: 'Contract & dayrate intelligence',     priority:'High',   agentType:'Document AI',       kpis:'Contract review hrs, suspension exposure, dayrate opportunity capture',  valueDriver:'Cost Reduction / Efficiency',    modelId: 'contractdr' },
-      { name: 'FPSO uptime & predictive maintenance',priority:'High',   agentType:'ML / Reliability',  kpis:'Uptime %, unplanned shutdowns avoided, maintenance cost reduction',     valueDriver:'Revenue / Production Uplift',    modelId: 'fpsoupt'    },
-      { name: 'FPSO O&M knowledge management',      priority:'High',   agentType:'AI Assistant',      kpis:'Search cycle time, handover error rate, cross-fleet lessons captured',  valueDriver:'Cost Reduction / Efficiency',    modelId: 'fpsoknow'   },
+
     ]
   },
 };
@@ -3843,7 +3844,7 @@ const MODEL_SECTOR = {
   revprot: 'power', billinq: 'power', payrisk: 'power', billex: 'power',
   nucspare: 'power', nucdata: 'power', nuctrouble: 'power', nucdoc: 'power',
   leasetitle: 'upstream', joaclause: 'upstream', landmanqa: 'upstream', addiligence: 'upstream',
-  npti: 'epc', contractdr: 'epc', fpsoupt: 'epc', fpsoknow: 'epc',
+  npti: 'upstream', contractdr: 'upstream', fpsoupt: 'upstream', fpsoknow: 'upstream',
 };
 
 const USE_CASES = [
