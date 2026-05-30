@@ -2136,6 +2136,10 @@ const TAXONOMY = {
       { name: 'Workforce demand forecasting',       priority:'Medium', agentType:'Analytics',         kpis:'Forecast accuracy %, skills gap identified, planning cycle time',       valueDriver:'Cost Reduction / Efficiency',    modelId: null },
       { name: 'Learning & competency gap analysis', priority:'Medium', agentType:'Analytics',         kpis:'Competency gap closure rate, training completion %, internal mobility', valueDriver:'Cost Reduction / Efficiency',    modelId: null },
       { name: 'Safety training compliance tracking', priority:'Medium', agentType:'Compliance',       kpis:'Training compliance rate %, non-compliance incidents',                  valueDriver:'Risk & Compliance',              modelId: null },
+      { name: 'Rig downtime & NPT intelligence',     priority:'High',   agentType:'ML / Reliability',  kpis:'NPT hours avoided, DDR automation hrs, BOP failure prediction rate',    valueDriver:'Revenue / Production Uplift',    modelId: 'npti'       },
+      { name: 'Contract & dayrate intelligence',     priority:'High',   agentType:'Document AI',       kpis:'Contract review hrs, suspension exposure, dayrate opportunity capture',  valueDriver:'Cost Reduction / Efficiency',    modelId: 'contractdr' },
+      { name: 'FPSO uptime & predictive maintenance',priority:'High',   agentType:'ML / Reliability',  kpis:'Uptime %, unplanned shutdowns avoided, maintenance cost reduction',     valueDriver:'Revenue / Production Uplift',    modelId: 'fpsoupt'    },
+      { name: 'FPSO O&M knowledge management',      priority:'High',   agentType:'AI Assistant',      kpis:'Search cycle time, handover error rate, cross-fleet lessons captured',  valueDriver:'Cost Reduction / Efficiency',    modelId: 'fpsoknow'   },
     ]
   },
 };
@@ -3381,6 +3385,456 @@ const UC_ADDILIGENCE = {
   },
 };
 
+
+// ============================================================
+// USE CASE 20: RIG DOWNTIME & NPT INTELLIGENCE
+// Noble Corporation · Transocean · Offshore Drilling Contractors
+// ============================================================
+// Agent monitors BOP performance, top drive history, mud pump
+// sensor feeds, equipment maintenance records, and daily drilling
+// reports across the fleet to predict failures before they cause
+// NPT and to automate well delivery reporting.
+//
+const UC_NPTI = {
+  id: 'npti',
+  icon: Icons.prod,
+  name: 'Rig Downtime & NPT Intelligence',
+  meta: 'EPC & Corporate · Offshore Drilling',
+  title: 'Rig Downtime & <em>NPT Intelligence</em>',
+  eyebrow: 'Use Case · 20',
+  description: 'Agentic monitoring of rig sensor feeds, BOP performance data, top drive history, mud pump diagnostics, and maintenance records to predict equipment failures before they cause non-productive time. Agent surfaces anomaly patterns across the fleet, generates pre-failure alerts, recommends corrective actions, and automates daily drilling report compilation — protecting dayrate revenue and improving client well delivery performance.',
+  sections: [
+    { title: 'Fleet & Dayrate Profile', inputs: [
+      { id: 'drillships',      label: 'Drillships / semis in active fleet',         default: 28,     unit: 'units',  key: true },
+      { id: 'jackups',         label: 'Jackup rigs in active fleet',                default: 13,     unit: 'units'             },
+      { id: 'avg_dr_floater',  label: 'Avg contracted dayrate — floaters',          default: 450000, unit: '$/day',  key: true },
+      { id: 'avg_dr_jackup',   label: 'Avg contracted dayrate — jackups',           default: 165000, unit: '$/day'             },
+      { id: 'utilization',     label: 'Active fleet utilization rate',              default: 0.92,   unit: '%', pct: true      },
+    ]},
+    { title: 'NPT Baseline', inputs: [
+      { id: 'npt_rate_floater', label: 'NPT rate — floaters (% of operating time)', default: 0.06,  unit: '%', pct: true, key: true },
+      { id: 'npt_rate_jackup',  label: 'NPT rate — jackups (% of operating time)',  default: 0.05,  unit: '%', pct: true           },
+      { id: 'npt_red',          label: 'NPT reduction — agent predictive alerts',   default: 0.22,  unit: '%', pct: true, key: true },
+      { id: 'bop_share',        label: '% of NPT attributable to BOP / subsea equip', default: 0.35, unit: '%', pct: true, key: true },
+      { id: 'bop_pred_red',     label: 'BOP NPT reduction from predictive monitoring', default: 0.30, unit: '%', pct: true },
+    ]},
+    { title: 'Daily Drilling Report Automation', inputs: [
+      { id: 'report_hrs_base',   label: 'Driller / engineer hrs per DDR (baseline)', default: 2.2,  unit: 'hrs',              },
+      { id: 'report_hrs_future', label: 'Driller / engineer hrs per DDR (agent)',    default: 0.4,  unit: 'hrs',    key: true },
+      { id: 'reports_per_rig',   label: 'DDRs generated per rig per year',           default: 365,  unit: 'reports'           },
+      { id: 'driller_rate',      label: 'Fully-loaded driller / engineer $/hr',      default: 145,  unit: '$/hr'              },
+    ]},
+    { title: 'Maintenance Scheduling Efficiency', inputs: [
+      { id: 'maint_fte',         label: 'Rig maintenance engineers (FTEs) in scope', default: 85,   unit: 'FTEs'              },
+      { id: 'maint_rate',        label: 'Fully-loaded maintenance engineer $/hr',    default: 125,  unit: '$/hr'              },
+      { id: 'maint_search_pct',  label: '% of maintenance time on doc / record search', default: 0.20, unit: '%', pct: true  },
+      { id: 'maint_search_red',  label: 'Search time reduction (agent)',             default: 0.55, unit: '%', pct: true, key: true },
+    ]},
+    { title: 'Cohere North Platform', inputs: [
+      { id: 'users_y1', label: 'Users — Year 1', default: 200,   unit: 'users', key: true },
+      { id: 'users_y2', label: 'Users — Year 2', default: 1200,  unit: 'users', key: true },
+      { id: 'users_y3', label: 'Users — Year 3', default: 3500,  unit: 'users', key: true },
+      { id: 'fee_y1',   label: 'Cohere fee — Year 1', default: 750000,  unit: '$', key: true },
+      { id: 'fee_y2',   label: 'Cohere fee — Year 2', default: 3500000, unit: '$', key: true },
+      { id: 'fee_y3',   label: 'Cohere fee — Year 3', default: 8000000, unit: '$', key: true },
+      { id: 'rf_y1',    label: 'Value realization — Y1', default: 0.35, unit: '%', pct: true, key: true },
+      { id: 'rf_y2',    label: 'Value realization — Y2', default: 0.70, unit: '%', pct: true, key: true },
+      { id: 'rf_y3',    label: 'Value realization — Y3', default: 1.00, unit: '%', pct: true, key: true },
+    ]},
+  ],
+  compute(i) {
+    // Annual rig-days at work
+    const floaterDays = i.drillships * 365 * i.utilization;
+    const jackupDays  = i.jackups   * 365 * i.utilization;
+
+    // DRIVER 1: NPT dayrate protection (floaters)
+    // NPT hours avoided = floater rig-days × NPT rate × reduction × 24
+    const floaterNPTBase = floaterDays * i.npt_rate_floater * i.npt_red * i.avg_dr_floater;
+    const jackupNPTBase  = jackupDays  * i.npt_rate_jackup  * i.npt_red * i.avg_dr_jackup  * 0.5; // jackup penalty typically ~50% of dayrate for NPT
+
+    // DRIVER 2: BOP / subsea equipment predictive value
+    // Already captured within NPT reduction above — separate driver for the BOP-specific monitoring premium
+    const totalNPTValue = floaterNPTBase + jackupNPTBase;
+    const nptBase = totalNPTValue;
+
+    // DRIVER 3: DDR automation labor savings
+    const totalRigs  = i.drillships + i.jackups;
+    const ddrBase = totalRigs * i.reports_per_rig * (i.report_hrs_base - i.report_hrs_future) * i.driller_rate;
+
+    // DRIVER 4: Maintenance search time savings
+    const maintBase = i.maint_fte * 2000 * i.maint_search_pct * i.maint_search_red * i.maint_rate;
+
+    const years = [
+      { rf: i.rf_y1, users: i.users_y1, fee: i.fee_y1 },
+      { rf: i.rf_y2, users: i.users_y2, fee: i.fee_y2 },
+      { rf: i.rf_y3, users: i.users_y3, fee: i.fee_y3 },
+    ];
+    const rows = years.map(y => ({
+      npt:   nptBase   * y.rf,
+      ddr:   ddrBase   * y.rf,
+      maint: maintBase * y.rf,
+      users: y.users, fee: y.fee,
+    }));
+    rows.forEach(r => {
+      r.gross = r.npt + r.ddr + r.maint;
+      r.net   = r.gross - r.fee;
+      r.roi   = r.gross / (r.fee || 1);
+    });
+    return {
+      years: rows,
+      drivers: [
+        { name: 'NPT dayrate protection',          key: 'npt'   },
+        { name: 'DDR automation labor savings',    key: 'ddr'   },
+        { name: 'Maintenance search efficiency',   key: 'maint' },
+      ],
+      context: {
+        floaterDays:    Math.round(floaterDays),
+        annualNPTHours: Math.round(floaterDays * i.npt_rate_floater * 24),
+        ddrHrsSaved:    Math.round((i.drillships + i.jackups) * i.reports_per_rig * (i.report_hrs_base - i.report_hrs_future)),
+      },
+    };
+  },
+};
+
+
+// ============================================================
+// USE CASE 21: CONTRACT & DAYRATE INTELLIGENCE
+// Noble Corporation · Transocean · Offshore Drilling Contractors
+// ============================================================
+// Agent builds a clause library from executed contracts, compares
+// new drafts against operator preferred positions, surfaces
+// suspension/termination triggers, and flags dayrate renegotiation
+// windows across the active backlog.
+//
+const UC_CONTRACTDR = {
+  id: 'contractdr',
+  icon: Icons.jobplan,
+  name: 'Contract & Dayrate Intelligence',
+  meta: 'EPC & Corporate · Offshore Drilling',
+  title: 'Contract & <em>Dayrate Intelligence</em>',
+  eyebrow: 'Use Case · 21',
+  description: 'Agent builds a clause library from the operator\'s portfolio of drilling contracts, compares new drafts against preferred commercial positions, surfaces dayrate renegotiation opportunities, flags suspension provisions, force majeure triggers, early termination penalties, and performance bonus thresholds across the active backlog. Enables the contracts and commercial team to manage a multi-billion-dollar backlog without relying on tribal knowledge or manual review cycles.',
+  sections: [
+    { title: 'Commercial Portfolio Scale', inputs: [
+      { id: 'active_contracts',   label: 'Active drilling contracts in portfolio',        default: 35,          unit: 'contracts', key: true },
+      { id: 'backlog_value',      label: 'Total contract backlog value',                  default: 6500000000,  unit: '$',         key: true },
+      { id: 'avg_contract_value', label: 'Average remaining contract value',              default: 185000000,   unit: '$'                    },
+      { id: 'new_contracts_yr',   label: 'New contracts / amendments negotiated per year', default: 22,         unit: 'contracts', key: true },
+    ]},
+    { title: 'Contract Management Labor', inputs: [
+      { id: 'contracts_fte',     label: 'Contracts & commercial team FTEs',              default: 18,   unit: 'FTEs'                  },
+      { id: 'legal_fte',         label: 'In-house legal FTEs supporting contracts',      default: 6,    unit: 'FTEs'                  },
+      { id: 'contracts_rate',    label: 'Fully-loaded contracts staff $/hr',             default: 145,  unit: '$/hr'                  },
+      { id: 'legal_rate',        label: 'Fully-loaded in-house attorney $/hr',           default: 225,  unit: '$/hr'                  },
+      { id: 'outside_counsel',   label: 'Annual outside counsel spend on drilling contracts', default: 3500000, unit: '$', key: true },
+    ]},
+    { title: 'Review Efficiency', inputs: [
+      { id: 'hrs_per_contract_base',   label: 'Hours per contract review (baseline)',       default: 18.0, unit: 'hrs', key: true },
+      { id: 'hrs_per_contract_future', label: 'Hours per contract review (agent)',          default: 6.0,  unit: 'hrs', key: true },
+      { id: 'outside_red',             label: 'Outside counsel time reduction (agent)',      default: 0.40, unit: '%', pct: true, key: true },
+      { id: 'nego_days_base',          label: 'Avg negotiation cycle (days, baseline)',     default: 42,   unit: 'days'              },
+      { id: 'nego_days_future',        label: 'Avg negotiation cycle (days, agent)',        default: 18,   unit: 'days',   key: true },
+    ]},
+    { title: 'Commercial Risk & Opportunity', inputs: [
+      { id: 'suspension_exposure',  label: 'Estimated annual suspension clause exposure',  default: 8500000,  unit: '$', key: true },
+      { id: 'suspension_red',       label: 'Exposure reduction (faster clause surfacing)',  default: 0.35,    unit: '%', pct: true, key: true },
+      { id: 'dayrate_oppty',        label: 'Annual dayrate renegotiation opportunity',     default: 12000000, unit: '$', key: true },
+      { id: 'dayrate_capture',      label: 'Opportunity capture rate (agent-identified)',  default: 0.25,    unit: '%', pct: true, key: true },
+    ]},
+    { title: 'Cohere North Platform', inputs: [
+      { id: 'users_y1', label: 'Users — Year 1', default: 75,    unit: 'users', key: true },
+      { id: 'users_y2', label: 'Users — Year 2', default: 400,   unit: 'users', key: true },
+      { id: 'users_y3', label: 'Users — Year 3', default: 1000,  unit: 'users', key: true },
+      { id: 'fee_y1',   label: 'Cohere fee — Year 1', default: 400000,  unit: '$', key: true },
+      { id: 'fee_y2',   label: 'Cohere fee — Year 2', default: 1800000, unit: '$', key: true },
+      { id: 'fee_y3',   label: 'Cohere fee — Year 3', default: 4000000, unit: '$', key: true },
+      { id: 'rf_y1',    label: 'Value realization — Y1', default: 0.40, unit: '%', pct: true, key: true },
+      { id: 'rf_y2',    label: 'Value realization — Y2', default: 0.75, unit: '%', pct: true, key: true },
+      { id: 'rf_y3',    label: 'Value realization — Y3', default: 1.00, unit: '%', pct: true, key: true },
+    ]},
+  ],
+  compute(i) {
+    // DRIVER 1: Inside contracts + legal labor savings
+    const hrsSaved    = i.hrs_per_contract_base - i.hrs_per_contract_future;
+    const insideBase  = i.new_contracts_yr * hrsSaved * ((i.contracts_fte * i.contracts_rate + i.legal_fte * i.legal_rate) / (i.contracts_fte + i.legal_fte || 1));
+
+    // DRIVER 2: Outside counsel reduction
+    const outsideBase = i.outside_counsel * i.outside_red;
+
+    // DRIVER 3: Negotiation cycle time value
+    const daysSaved   = i.nego_days_base - i.nego_days_future;
+    // Value of faster contract signing = backlog per contract × days saved × WACC/365
+    const cycleBase   = i.new_contracts_yr * i.avg_contract_value * (daysSaved / 365) * 0.08;
+
+    // DRIVER 4: Suspension clause exposure reduction
+    const suspBase    = i.suspension_exposure * i.suspension_red;
+
+    // DRIVER 5: Dayrate renegotiation opportunity capture
+    const dayrateBase = i.dayrate_oppty * i.dayrate_capture;
+
+    const years = [
+      { rf: i.rf_y1, users: i.users_y1, fee: i.fee_y1 },
+      { rf: i.rf_y2, users: i.users_y2, fee: i.fee_y2 },
+      { rf: i.rf_y3, users: i.users_y3, fee: i.fee_y3 },
+    ];
+    const rows = years.map(y => ({
+      inside:    insideBase  * y.rf,
+      outside:   outsideBase * y.rf,
+      cycle:     cycleBase   * y.rf,
+      suspension: suspBase   * y.rf,
+      dayrate:   dayrateBase * y.rf,
+      users: y.users, fee: y.fee,
+    }));
+    rows.forEach(r => {
+      r.gross = r.inside + r.outside + r.cycle + r.suspension + r.dayrate;
+      r.net   = r.gross - r.fee;
+      r.roi   = r.gross / (r.fee || 1);
+    });
+    return {
+      years: rows,
+      drivers: [
+        { name: 'Inside contracts / legal labor',  key: 'inside'      },
+        { name: 'Outside counsel savings',         key: 'outside'     },
+        { name: 'Negotiation cycle time value',    key: 'cycle'       },
+        { name: 'Suspension clause risk reduction', key: 'suspension'  },
+        { name: 'Dayrate opportunity capture',     key: 'dayrate'     },
+      ],
+      context: {
+        hrsSaved,
+        daysSaved,
+        contractsManaged: i.active_contracts,
+        backlogValue: i.backlog_value,
+      },
+    };
+  },
+};
+
+
+// ============================================================
+// USE CASE 22: FPSO UPTIME & PREDICTIVE MAINTENANCE
+// SBM Offshore · MODEC · FPSO Owner-Operators
+// ============================================================
+// Agent monitors production equipment — separators, compressors,
+// gas treatment trains, water injection systems, subsea risers —
+// against maintenance schedules and real-time sensor anomalies
+// to prevent unplanned shutdowns on lease-operated FPSOs where
+// the operator bears production uptime risk.
+//
+const UC_FPSOUPT = {
+  id: 'fpsoupt',
+  icon: Icons.prod,
+  name: 'FPSO Uptime & Predictive Maintenance',
+  meta: 'EPC & Corporate · FPSO Operations',
+  title: 'FPSO Uptime & <em>Predictive Maintenance</em>',
+  eyebrow: 'Use Case · 22',
+  description: 'Agentic monitoring of FPSO production equipment — separators, compressors, gas treatment trains, water injection pumps, power generation systems, and subsea riser performance — against maintenance schedules and live sensor anomaly patterns. Agent generates pre-failure alerts, recommends corrective actions, and optimizes planned maintenance windows to protect production uptime and minimize the cost of unplanned shutdowns on long-term lease-operated FPSOs.',
+  sections: [
+    { title: 'FPSO Fleet Profile', inputs: [
+      { id: 'fpso_count',      label: 'FPSOs in lease-and-operate scope',            default: 15,    unit: 'FPSOs',  key: true },
+      { id: 'avg_prod_bopd',   label: 'Avg gross production per FPSO (BOPD)',        default: 120000, unit: 'BOPD',  key: true },
+      { id: 'oil_price',       label: 'Realized oil price ($/bbl)',                  default: 70,    unit: '$/bbl',  key: true },
+      { id: 'op_share',        label: 'Operator / lessor revenue share (net)',        default: 0.15,  unit: '%', pct: true    },
+      { id: 'opex_per_bbl',    label: 'FPSO operating cost per bbl produced',        default: 12,    unit: '$/bbl'            },
+    ]},
+    { title: 'Uptime & Shutdown Profile', inputs: [
+      { id: 'uptime_base',      label: 'Fleet average uptime — baseline (%)',        default: 0.962, unit: '%', pct: true, key: true },
+      { id: 'uptime_improvement', label: 'Uptime improvement — predictive monitoring', default: 0.008, unit: '%', pct: true, key: true },
+      { id: 'unplanned_shutdowns_yr', label: 'Unplanned production shutdowns per FPSO/yr', default: 3.5, unit: 'events', key: true },
+      { id: 'avg_shutdown_days',   label: 'Avg duration per unplanned shutdown (days)',  default: 4.2, unit: 'days',  key: true },
+      { id: 'shutdown_red',        label: 'Unplanned shutdown reduction (agent)',        default: 0.25, unit: '%', pct: true, key: true },
+    ]},
+    { title: 'Maintenance Cost Optimization', inputs: [
+      { id: 'maint_spend_fpso',   label: 'Annual maintenance spend per FPSO',        default: 35000000, unit: '$',  key: true },
+      { id: 'maint_cost_red',     label: 'Maintenance cost reduction (optimized scheduling)', default: 0.08, unit: '%', pct: true, key: true },
+      { id: 'emergency_maint_pct', label: 'Emergency / unplanned maintenance as % of total', default: 0.22, unit: '%', pct: true },
+      { id: 'emergency_premium',   label: 'Cost premium on emergency maintenance',    default: 0.45,  unit: '%', pct: true },
+      { id: 'emergency_red',       label: 'Emergency maintenance reduction (agent)',  default: 0.35,  unit: '%', pct: true           },
+    ]},
+    { title: 'Regulatory & Compliance', inputs: [
+      { id: 'reg_hrs_pct',    label: 'O&M engineer hrs on regulatory prep (% of total)', default: 0.12, unit: '%', pct: true },
+      { id: 'reg_red',        label: 'Regulatory prep time reduction',                   default: 0.45, unit: '%', pct: true, key: true },
+      { id: 'eng_fte',        label: 'O&M engineers per FPSO',                           default: 18,   unit: 'FTEs'              },
+      { id: 'eng_rate',       label: 'Fully-loaded O&M engineer $/hr',                   default: 130,  unit: '$/hr'              },
+    ]},
+    { title: 'Cohere North Platform', inputs: [
+      { id: 'users_y1', label: 'Users — Year 1', default: 200,   unit: 'users', key: true },
+      { id: 'users_y2', label: 'Users — Year 2', default: 1000,  unit: 'users', key: true },
+      { id: 'users_y3', label: 'Users — Year 3', default: 2500,  unit: 'users', key: true },
+      { id: 'fee_y1',   label: 'Cohere fee — Year 1', default: 750000,  unit: '$', key: true },
+      { id: 'fee_y2',   label: 'Cohere fee — Year 2', default: 3500000, unit: '$', key: true },
+      { id: 'fee_y3',   label: 'Cohere fee — Year 3', default: 8000000, unit: '$', key: true },
+      { id: 'rf_y1',    label: 'Value realization — Y1', default: 0.35, unit: '%', pct: true, key: true },
+      { id: 'rf_y2',    label: 'Value realization — Y2', default: 0.70, unit: '%', pct: true, key: true },
+      { id: 'rf_y3',    label: 'Value realization — Y3', default: 1.00, unit: '%', pct: true, key: true },
+    ]},
+  ],
+  compute(i) {
+    // Daily gross production value per FPSO
+    const grossRevPerFPSODay = i.avg_prod_bopd * i.oil_price;
+
+    // DRIVER 1: Uptime improvement — incremental production revenue (lessor share)
+    // Total fleet production days × uptime improvement × gross rev × op share
+    const totalProdDays = i.fpso_count * 365;
+    const uptimeBase = totalProdDays * i.uptime_improvement * grossRevPerFPSODay * i.op_share;
+
+    // DRIVER 2: Unplanned shutdown avoidance
+    const shutdownsAvoided = i.fpso_count * i.unplanned_shutdowns_yr * i.shutdown_red;
+    const revenuePerShutdown = i.avg_shutdown_days * grossRevPerFPSODay * i.op_share;
+    const shutdownBase = shutdownsAvoided * revenuePerShutdown;
+
+    // DRIVER 3: Maintenance cost optimization
+    const totalMaintSpend = i.fpso_count * i.maint_spend_fpso;
+    const plannedMaintBase = totalMaintSpend * (1 - i.emergency_maint_pct) * i.maint_cost_red;
+    const emergencyMaintBase = totalMaintSpend * i.emergency_maint_pct * i.emergency_premium * i.emergency_red;
+    const maintBase = plannedMaintBase + emergencyMaintBase;
+
+    // DRIVER 4: Regulatory & compliance labor savings
+    const totalEngFTE = i.fpso_count * i.eng_fte;
+    const regBase = totalEngFTE * 2000 * i.reg_hrs_pct * i.reg_red * i.eng_rate;
+
+    const years = [
+      { rf: i.rf_y1, users: i.users_y1, fee: i.fee_y1 },
+      { rf: i.rf_y2, users: i.users_y2, fee: i.fee_y2 },
+      { rf: i.rf_y3, users: i.users_y3, fee: i.fee_y3 },
+    ];
+    const rows = years.map(y => ({
+      uptime:   uptimeBase   * y.rf,
+      shutdown: shutdownBase * y.rf,
+      maint:    maintBase    * y.rf,
+      reg:      regBase      * y.rf,
+      users: y.users, fee: y.fee,
+    }));
+    rows.forEach(r => {
+      r.gross = r.uptime + r.shutdown + r.maint + r.reg;
+      r.net   = r.gross - r.fee;
+      r.roi   = r.gross / (r.fee || 1);
+    });
+    return {
+      years: rows,
+      drivers: [
+        { name: 'Production uptime improvement',   key: 'uptime'    },
+        { name: 'Unplanned shutdown avoidance',    key: 'shutdown'  },
+        { name: 'Maintenance cost optimization',   key: 'maint'     },
+        { name: 'Regulatory prep efficiency',      key: 'reg'       },
+      ],
+      context: {
+        grossFleetProdValue: Math.round(i.fpso_count * 365 * grossRevPerFPSODay / 1e6),
+        shutdownsAvoided:    Math.round(shutdownsAvoided),
+        totalMaintSpend:     Math.round(totalMaintSpend),
+      },
+    };
+  },
+};
+
+
+// ============================================================
+// USE CASE 23: O&M KNOWLEDGE MANAGEMENT
+// SBM Offshore · MODEC · FPSO Owner-Operators
+// ============================================================
+// Agent provides a conversational knowledge interface across the
+// operator's full O&M document corpus — maintenance procedures,
+// equipment manuals, handover packages, GEMS/GTS documents,
+// lessons learned, and regulatory correspondence — across 15+
+// FPSOs operating in multiple languages and jurisdictions.
+//
+const UC_FPSOKNOW = {
+  id: 'fpsoknow',
+  icon: Icons.field,
+  name: 'FPSO O&M Knowledge Management',
+  meta: 'EPC & Corporate · FPSO Operations',
+  title: 'FPSO O&M <em>Knowledge Management</em>',
+  eyebrow: 'Use Case · 23',
+  description: 'Conversational knowledge interface across the FPSO operator\'s full O&M document corpus — maintenance procedures, equipment manuals, handover packages, enterprise management system (GEMS/GTS) documents, lessons learned libraries, and regulatory correspondence — covering 15+ FPSOs operating across multiple countries, languages, and regulatory jurisdictions. Engineers and technicians query natural language questions and receive answers with source citations, reducing information retrieval time from hours to seconds and improving handover quality across the fleet.',
+  sections: [
+    { title: 'Offshore Workforce Scale', inputs: [
+      { id: 'fpso_count',     label: 'FPSOs in O&M scope',                         default: 15,   unit: 'FPSOs',  key: true },
+      { id: 'offshore_fte',   label: 'Offshore O&M personnel per FPSO',            default: 130,  unit: 'FTEs/FPSO', key: true },
+      { id: 'shore_eng_fte',  label: 'Shore-based engineering support FTEs',       default: 85,   unit: 'FTEs'               },
+      { id: 'tech_rate',      label: 'Fully-loaded offshore technician $/hr',      default: 95,   unit: '$/hr'               },
+      { id: 'eng_rate',       label: 'Fully-loaded shore engineer $/hr',           default: 130,  unit: '$/hr',   key: true  },
+    ]},
+    { title: 'Document Search & Retrieval', inputs: [
+      { id: 'searches_per_day',       label: 'Procedure / document searches per person per day', default: 5.0,  unit: 'searches', key: true },
+      { id: 'mins_per_search_base',   label: 'Avg minutes per search — baseline',               default: 24,   unit: 'min',      key: true },
+      { id: 'mins_per_search_future', label: 'Avg minutes per search — agent-assisted',         default: 2.5,  unit: 'min',      key: true },
+      { id: 'search_capture',         label: 'Time savings capture factor',                     default: 0.50, unit: '%', pct: true         },
+      { id: 'working_days',           label: 'Working rotations / effective days per year',     default: 182,  unit: 'days'                 },
+    ]},
+    { title: 'Handover Quality & Safety', inputs: [
+      { id: 'handovers_yr',     label: 'Crew handovers per FPSO per year',          default: 24,   unit: 'handovers'          },
+      { id: 'handover_hrs',     label: 'Hrs per handover preparation (baseline)',   default: 6.5,  unit: 'hrs',    key: true  },
+      { id: 'handover_red',     label: 'Handover prep time reduction (agent)',      default: 0.50, unit: '%', pct: true, key: true },
+      { id: 'handover_error_cost', label: 'Avg cost per handover error / near-miss', default: 45000, unit: '$', key: true   },
+      { id: 'error_red',        label: 'Handover error reduction (better knowledge)', default: 0.35, unit: '%', pct: true   },
+      { id: 'errors_per_fpso',  label: 'Reportable handover errors per FPSO per year', default: 2.8, unit: 'events'         },
+    ]},
+    { title: 'Cross-Fleet Knowledge Sharing', inputs: [
+      { id: 'lessons_value',    label: 'Estimated value of cross-fleet lessons learned / yr', default: 2500000, unit: '$', key: true },
+      { id: 'lessons_capture',  label: 'Lessons learned capture improvement (agent)',          default: 0.55, unit: '%', pct: true, key: true },
+    ]},
+    { title: 'Cohere North Platform', inputs: [
+      { id: 'users_y1', label: 'Users — Year 1', default: 300,   unit: 'users', key: true },
+      { id: 'users_y2', label: 'Users — Year 2', default: 1500,  unit: 'users', key: true },
+      { id: 'users_y3', label: 'Users — Year 3', default: 4000,  unit: 'users', key: true },
+      { id: 'fee_y1',   label: 'Cohere fee — Year 1', default: 750000,  unit: '$', key: true },
+      { id: 'fee_y2',   label: 'Cohere fee — Year 2', default: 3500000, unit: '$', key: true },
+      { id: 'fee_y3',   label: 'Cohere fee — Year 3', default: 8000000, unit: '$', key: true },
+      { id: 'rf_y1',    label: 'Value realization — Y1', default: 0.35, unit: '%', pct: true, key: true },
+      { id: 'rf_y2',    label: 'Value realization — Y2', default: 0.70, unit: '%', pct: true, key: true },
+      { id: 'rf_y3',    label: 'Value realization — Y3', default: 1.00, unit: '%', pct: true, key: true },
+    ]},
+  ],
+  compute(i) {
+    const totalOffshore = i.fpso_count * i.offshore_fte;
+    const blendedRate = (totalOffshore * i.tech_rate + i.shore_eng_fte * i.eng_rate) / (totalOffshore + i.shore_eng_fte || 1);
+
+    // DRIVER 1: Document search time savings
+    const searchHrsSavedPerDay = (i.mins_per_search_base - i.mins_per_search_future) / 60 * i.searches_per_day;
+    const searchBase = (totalOffshore + i.shore_eng_fte) * searchHrsSavedPerDay * i.working_days * blendedRate * i.search_capture;
+
+    // DRIVER 2: Handover preparation labor savings
+    const handoverBase = i.fpso_count * i.handovers_yr * i.handover_hrs * i.handover_red * blendedRate;
+
+    // DRIVER 3: Handover error reduction
+    const errorBase = i.fpso_count * i.errors_per_fpso * i.error_red * i.handover_error_cost;
+
+    // DRIVER 4: Cross-fleet lessons learned capture value
+    const lessonsBase = i.lessons_value * i.lessons_capture;
+
+    const years = [
+      { rf: i.rf_y1, users: i.users_y1, fee: i.fee_y1 },
+      { rf: i.rf_y2, users: i.users_y2, fee: i.fee_y2 },
+      { rf: i.rf_y3, users: i.users_y3, fee: i.fee_y3 },
+    ];
+    const rows = years.map(y => ({
+      search:   searchBase  * y.rf,
+      handover: handoverBase * y.rf,
+      errors:   errorBase   * y.rf,
+      lessons:  lessonsBase  * y.rf,
+      users: y.users, fee: y.fee,
+    }));
+    rows.forEach(r => {
+      r.gross = r.search + r.handover + r.errors + r.lessons;
+      r.net   = r.gross - r.fee;
+      r.roi   = r.gross / (r.fee || 1);
+    });
+    return {
+      years: rows,
+      drivers: [
+        { name: 'Document search time savings',   key: 'search'   },
+        { name: 'Handover prep labor savings',    key: 'handover' },
+        { name: 'Handover error reduction',       key: 'errors'   },
+        { name: 'Cross-fleet lessons capture',    key: 'lessons'  },
+      ],
+      context: {
+        totalPersonnel: totalOffshore + i.shore_eng_fte,
+        searchHrsSavedPerDay: Math.round(searchHrsSavedPerDay * 10) / 10,
+        blendedRate:    Math.round(blendedRate),
+      },
+    };
+  },
+};
+
 // Map modelId to sector for tab activation
 const MODEL_SECTOR = {
   field: 'upstream', safety: 'upstream', prod: 'upstream',
@@ -3389,6 +3843,7 @@ const MODEL_SECTOR = {
   revprot: 'power', billinq: 'power', payrisk: 'power', billex: 'power',
   nucspare: 'power', nucdata: 'power', nuctrouble: 'power', nucdoc: 'power',
   leasetitle: 'upstream', joaclause: 'upstream', landmanqa: 'upstream', addiligence: 'upstream',
+  npti: 'epc', contractdr: 'epc', fpsoupt: 'epc', fpsoknow: 'epc',
 };
 
 const USE_CASES = [
@@ -3397,6 +3852,7 @@ const USE_CASES = [
   UC_REVPROT, UC_BILLINQ, UC_PAYRISK, UC_BILLEX,
   UC_NUCSPARE, UC_NUCDATA, UC_NUCTROUBLE, UC_NUCDOC,
   UC_LEASETITLE, UC_JOACLAUSE, UC_LANDMANQA, UC_ADDILIGENCE,
+  UC_NPTI, UC_CONTRACTDR, UC_FPSOUPT, UC_FPSOKNOW,
 ];
 
 // ============================================================
@@ -3816,6 +4272,14 @@ function renderResults() {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> Total billing calls/yr: <strong>${fmtNum(result.context.totalCalls)}</strong> · Calls deflected/yr: <strong>${fmtNum(result.context.deflectedCalls)}</strong> · Repeat contacts avoided/yr: <strong>${fmtNum(result.context.repeatsAvoided)}</strong>. Call deflection is the largest driver; first-contact resolution improvement has significant long-term customer satisfaction value not captured here.</div>`;
   } else if (uc.id === 'payrisk') {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> Bad debt exposure: <strong>${fmtUSD(result.context.badDebtExposure)}</strong> · Delinquent accounts/yr: <strong>${fmtNum(result.context.delinqAccounts)}</strong> · Disconnections avoided/yr: <strong>${fmtNum(result.context.dcAvoided)}</strong>. Bad debt reduction is the dominant driver. Conservative: excludes customer lifetime value improvement from avoided disconnection and improved payment relationship.</div>`;
+  } else if (uc.id === 'npti') {
+    caveatHTML = `<div class="caveat"><strong>Context:</strong> Annual floater operating days: <strong>${fmtNum(result.context.floaterDays)}</strong> · Annual NPT hours (baseline): <strong>${fmtNum(result.context.annualNPTHours)}</strong> · DDR hours saved/yr: <strong>${fmtNum(result.context.ddrHrsSaved)}</strong>. NPT dayrate protection is the dominant driver at 35% Y1 realization — integration with rig SCADA, CMMS, and sensor data infrastructure takes time. Conservative: 22% NPT reduction is well below achievable best-in-class (30–40%) for ML-assisted predictive maintenance on mature sensor data. Excluded: client relationship value from improved well delivery performance, insurance premium improvements.</div>`;
+  } else if (uc.id === 'contractdr') {
+    caveatHTML = `<div class="caveat"><strong>Context:</strong> Hours saved per contract: <strong>${fmtNum(result.context.hrsSaved, 1)}</strong> · Days saved per negotiation: <strong>${fmtNum(result.context.daysSaved)}</strong> · Active contracts managed: <strong>${fmtNum(result.context.contractsManaged)}</strong> · Backlog: <strong>${fmtUSD(result.context.backlogValue)}</strong>. Dayrate opportunity capture and suspension clause risk reduction are the highest-leverage drivers — calibrate against your actual backlog exposure. Conservative: 25% dayrate opportunity capture is achievable with systematic renegotiation window identification. Excluded: strategic value of standardized clause library for training commercial teams.</div>`;
+  } else if (uc.id === 'fpsoupt') {
+    caveatHTML = `<div class="caveat"><strong>Context:</strong> Fleet gross production value: <strong>$${fmtNum(result.context.grossFleetProdValue)}M/yr</strong> · Shutdowns avoided/yr: <strong>${fmtNum(result.context.shutdownsAvoided)}</strong> · Total maintenance spend: <strong>${fmtUSD(result.context.totalMaintSpend)}</strong>. Production uptime improvement is the largest driver — even 0.8pp of uptime on a 15-FPSO fleet is substantial. Conservative: operator/lessor revenue share (15%) captures only the FPSO operator's contractual exposure, not the full field production value. Y1 at 35% reflects sensor data integration and ML model training period. Excluded: contract penalty avoidance from uptime guarantee breaches, downstream insurance premium improvements.</div>`;
+  } else if (uc.id === 'fpsoknow') {
+    caveatHTML = `<div class="caveat"><strong>Context:</strong> Total personnel in scope: <strong>${fmtNum(result.context.totalPersonnel)}</strong> · Search time saved per person/day: <strong>${fmtNum(result.context.searchHrsSavedPerDay, 1)} hrs</strong> · Blended rate: <strong>$${fmtNum(result.context.blendedRate)}/hr</strong>. Search time savings dominate at 50% capture factor. Handover error reduction depends on baseline error rate — the 2.8 events/FPSO/year default is conservative relative to reported industry rates. Conservative: excludes safety culture improvement value from better knowledge access and the training cost savings from faster onboarding of new crew members. Multilingual corpus (Portuguese, French, Arabic) adds deployment complexity that extends Y1 timeline.</div>`;
   } else if (uc.id === 'leasetitle') {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> New docs/yr: <strong>${fmtNum(result.context.docsPerYear)}</strong> · Hrs saved per document: <strong>${fmtNum(result.context.hrsSavedPerDoc, 1)}</strong> · Discrepancies detected early/yr: <strong>${fmtNum(result.context.discrepanciesDetected)}</strong>. Internal abstraction labor is the largest driver. Y1 at 40% reflects integration time with land system of record (Quorum, Enverus, P2 Tobin). Conservative: excludes value of continuous reconciliation catch rate improving over time as the model trains on the corpus.</div>`;
   } else if (uc.id === 'joaclause') {
