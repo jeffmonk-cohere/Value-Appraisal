@@ -2102,6 +2102,7 @@ const TAXONOMY = {
         { name: 'Fault prediction & preemptive maintenance', priority:'High', agentType:'ML / Reliability', kpis:'Pre-failure interventions, sustained customer interruptions avoided', valueDriver:'Revenue / Production Uplift', modelId: null },
         { name: 'Interconnection study automation', priority:'Medium', agentType:'DER / Workflow',     kpis:'Study cycle time, queue backlog, cost per application',                 valueDriver:'Cost Reduction / Efficiency',    modelId: null },
         { name: 'Storm hardening prioritization',   priority:'High',   agentType:'Resilience / Risk',  kpis:'Capital at-risk reduction, customer minutes interrupted per storm',    valueDriver:'Revenue / Production Uplift',    modelId: null },
+        { name: 'Consumer hazard image triage',      priority:'High',   agentType:'Vision AI / Workflow',kpis:'Truck rolls deflected %, repeat dispatch rate, veg outages avoided, crew safety incidents', valueDriver:'Cost Reduction / Efficiency', modelId: 'hazardimg' },
       ],
       'AMI / Customer': [
         { name: 'Demand response orchestration',    priority:'High',   agentType:'Customer / Optimization', kpis:'MW dispatched vs target, customer performance rate, DR event cost', valueDriver:'Revenue / Production Uplift', modelId: null },
@@ -3836,12 +3837,143 @@ const UC_FPSOKNOW = {
   },
 };
 
+
+// ============================================================
+// USE CASE — CONSUMER HAZARD IMAGE TRIAGE & FIELD CREW INTELLIGENCE
+// Power & Utilities · Distribution
+// ============================================================
+// Customers submit photos of potential hazards — downed lines,
+// vegetation encroachment, damaged equipment, flooding near
+// infrastructure. Today every submission triggers a truck roll.
+// An AI agent classifies images by hazard type and severity,
+// routes low-urgency items to scheduled queues, gives arriving
+// crews full situational context, and builds a real-time
+// vegetation risk heat map across the service territory.
+//
+const UC_HAZARDIMG = {
+  id: 'hazardimg',
+  icon: Icons.safety,
+  name: 'Consumer Hazard Image Triage',
+  meta: 'Power & Utilities · Distribution',
+  title: 'Consumer Hazard Image <em>Triage & Field Intelligence</em>',
+  eyebrow: 'Use Case · 08',
+  description: 'Customers submit photos of potential hazards — downed lines, vegetation encroachment, damaged poles and equipment, flooding near infrastructure, animal contacts. Today every submission triggers an immediate truck roll. An AI agent classifies incoming images by hazard type, severity tier, and urgency, routes low-risk items to scheduled maintenance queues, and pre-briefs arriving field crews with full image history, prior submissions from the same location, and a recommended response package — reducing truck rolls, improving crew safety, and building a live vegetation risk map across the service territory.',
+  sections: [
+    { title: 'Hazard Report Volume', inputs: [
+      { id: 'hazard_reports_yr',   label: 'Customer hazard image submissions per year',  default: 85000,  unit: 'reports',  key: true },
+      { id: 'dispatch_rate_base',  label: 'Current dispatch rate (% of reports)',         default: 0.92,   unit: '%', pct: true, key: true },
+      { id: 'cost_per_truck_roll', label: 'Fully-loaded cost per truck roll',             default: 285,    unit: '$',        key: true },
+      { id: 'avg_crew_size',       label: 'Average crew size per dispatch',               default: 2.2,    unit: 'linemen'             },
+      { id: 'lineman_rate',        label: 'Fully-loaded lineman $/hr',                    default: 115,    unit: '$/hr'                },
+    ]},
+    { title: 'Truck Roll Deflection', inputs: [
+      { id: 'deflect_rate',        label: '% of reports deflected by agent (non-emergency)', default: 0.38, unit: '%', pct: true, key: true },
+      { id: 'deflect_cost_pct',    label: 'Cost of deflected response (% of truck roll)',    default: 0.08, unit: '%', pct: true,
+        },
+      { id: 'repeat_dispatch_pct', label: '% of dispatches that require a repeat visit',     default: 0.18, unit: '%', pct: true, key: true },
+      { id: 'repeat_red',          label: 'Repeat dispatch reduction (better crew briefing)', default: 0.40, unit: '%', pct: true, key: true },
+    ]},
+    { title: 'Vegetation Management Optimization', inputs: [
+      { id: 'veg_spend_yr',        label: 'Annual vegetation management spend',           default: 28000000, unit: '$',      key: true },
+      { id: 'veg_efficiency_gain', label: 'Veg crew efficiency gain (risk-prioritized routing)', default: 0.12, unit: '%', pct: true, key: true },
+      { id: 'veg_outage_pct',      label: '% of outages caused by vegetation (baseline)', default: 0.40, unit: '%', pct: true           },
+      { id: 'veg_outage_red',      label: 'Vegetation outage reduction (better prioritization)', default: 0.15, unit: '%', pct: true, key: true },
+      { id: 'outages_yr',          label: 'Total distribution outage events per year',    default: 4200,   unit: 'events'              },
+      { id: 'cost_per_outage',     label: 'Average cost per outage event (SAIDI impact)', default: 8500,   unit: '$',                  },
+    ]},
+    { title: 'Field Crew Safety & Efficiency', inputs: [
+      { id: 'safety_incidents_yr', label: 'Reportable safety incidents per year (baseline)', default: 18,  unit: 'incidents'           },
+      { id: 'incident_cost',       label: 'Avg fully-loaded cost per safety incident',       default: 185000, unit: '$',   key: true   },
+      { id: 'incident_red',        label: 'Incident reduction (better situational awareness)', default: 0.20, unit: '%', pct: true, key: true },
+      { id: 'crew_hrs_per_job_base',   label: 'Avg crew hours per job — baseline',           default: 3.8,  unit: 'hrs',              },
+      { id: 'crew_hrs_per_job_future', label: 'Avg crew hours per job — agent-briefed',      default: 3.5,  unit: 'hrs',  key: true   },
+      { id: 'dispatches_per_yr',   label: 'Total dispatches per year (all hazard types)',     default: 75000, unit: 'dispatches'        },
+    ]},
+    { title: 'Cohere North Platform', inputs: [
+      { id: 'users_y1', label: 'Users — Year 1', default: 150,   unit: 'users', key: true },
+      { id: 'users_y2', label: 'Users — Year 2', default: 800,   unit: 'users', key: true },
+      { id: 'users_y3', label: 'Users — Year 3', default: 2000,  unit: 'users', key: true },
+      { id: 'fee_y1',   label: 'Cohere fee — Year 1', default: 400000,  unit: '$', key: true },
+      { id: 'fee_y2',   label: 'Cohere fee — Year 2', default: 1800000, unit: '$', key: true },
+      { id: 'fee_y3',   label: 'Cohere fee — Year 3', default: 4200000, unit: '$', key: true },
+      { id: 'rf_y1',    label: 'Value realization — Y1', default: 0.45, unit: '%', pct: true, key: true },
+      { id: 'rf_y2',    label: 'Value realization — Y2', default: 0.80, unit: '%', pct: true, key: true },
+      { id: 'rf_y3',    label: 'Value realization — Y3', default: 1.00, unit: '%', pct: true, key: true },
+    ]},
+  ],
+  compute(i) {
+    const totalDispatches = i.hazard_reports_yr * i.dispatch_rate_base;
+
+    // DRIVER 1: Truck roll deflection savings
+    // Deflected reports pay a small remote-response cost instead of full truck roll
+    const deflectedReports = i.hazard_reports_yr * i.deflect_rate;
+    const savingsPerDeflect = i.cost_per_truck_roll * (1 - i.deflect_cost_pct);
+    const deflectBase = deflectedReports * savingsPerDeflect;
+
+    // DRIVER 2: Repeat dispatch reduction
+    // Crew arrives with full image history + AI hazard classification → fewer return trips
+    const repeatDispatchBase = totalDispatches * i.repeat_dispatch_pct * i.repeat_red * i.cost_per_truck_roll;
+
+    // DRIVER 3: Vegetation management efficiency
+    // Risk-prioritized routing trims more hazardous spans per crew-day
+    const vegEffBase = i.veg_spend_yr * i.veg_efficiency_gain;
+
+    // DRIVER 4: Vegetation-caused outage reduction
+    const vegOutageBase = i.outages_yr * i.veg_outage_pct * i.veg_outage_red * i.cost_per_outage;
+
+    // DRIVER 5: Crew job efficiency (time on site)
+    const hrsSavedPerJob = i.crew_hrs_per_job_base - i.crew_hrs_per_job_future;
+    const crewEffBase = i.dispatches_per_yr * hrsSavedPerJob * i.avg_crew_size * i.lineman_rate;
+
+    // DRIVER 6: Safety incident reduction
+    const safetyBase = i.safety_incidents_yr * i.incident_red * i.incident_cost;
+
+    const years = [
+      { rf: i.rf_y1, users: i.users_y1, fee: i.fee_y1 },
+      { rf: i.rf_y2, users: i.users_y2, fee: i.fee_y2 },
+      { rf: i.rf_y3, users: i.users_y3, fee: i.fee_y3 },
+    ];
+    const rows = years.map(y => ({
+      deflect:    deflectBase      * y.rf,
+      repeat:     repeatDispatchBase * y.rf,
+      vegeff:     vegEffBase       * y.rf,
+      vegoutage:  vegOutageBase    * y.rf,
+      creweff:    crewEffBase      * y.rf,
+      safety:     safetyBase       * y.rf,
+      users: y.users, fee: y.fee,
+    }));
+    rows.forEach(r => {
+      r.gross = r.deflect + r.repeat + r.vegeff + r.vegoutage + r.creweff + r.safety;
+      r.net   = r.gross - r.fee;
+      r.roi   = r.gross / (r.fee || 1);
+    });
+    return {
+      years: rows,
+      drivers: [
+        { name: 'Truck roll deflection savings',      key: 'deflect'   },
+        { name: 'Repeat dispatch reduction',          key: 'repeat'    },
+        { name: 'Vegetation management efficiency',   key: 'vegeff'    },
+        { name: 'Vegetation outage reduction',        key: 'vegoutage' },
+        { name: 'Field crew job efficiency',          key: 'creweff'   },
+        { name: 'Safety incident reduction',          key: 'safety'    },
+      ],
+      context: {
+        deflectedReports:    Math.round(deflectedReports),
+        truckRollsSaved:     Math.round(deflectedReports + totalDispatches * i.repeat_dispatch_pct * i.repeat_red),
+        hrsSavedPerJob:      Math.round(hrsSavedPerJob * 10) / 10,
+        incidentsAvoided:    Math.round(i.safety_incidents_yr * i.incident_red),
+      },
+    };
+  },
+};
+
 // Map modelId to sector for tab activation
 const MODEL_SECTOR = {
   field: 'upstream', safety: 'upstream', prod: 'upstream',
   jobplan: 'upstream', workforce: 'upstream', mro: 'upstream',
   crude: 'midstream',
   revprot: 'power', billinq: 'power', payrisk: 'power', billex: 'power',
+  hazardimg: 'power',
   nucspare: 'power', nucdata: 'power', nuctrouble: 'power', nucdoc: 'power',
   leasetitle: 'upstream', joaclause: 'upstream', landmanqa: 'upstream', addiligence: 'upstream',
   npti: 'upstream', contractdr: 'upstream', fpsoupt: 'upstream', fpsoknow: 'upstream',
@@ -3850,7 +3982,7 @@ const MODEL_SECTOR = {
 const USE_CASES = [
   UC_FIELD, UC_SAFETY, UC_PROD, UC_JOBPLAN, UC_WORKFORCE, UC_MRO,
   UC_CRUDE,
-  UC_REVPROT, UC_BILLINQ, UC_PAYRISK, UC_BILLEX,
+  UC_REVPROT, UC_BILLINQ, UC_PAYRISK, UC_BILLEX, UC_HAZARDIMG,
   UC_NUCSPARE, UC_NUCDATA, UC_NUCTROUBLE, UC_NUCDOC,
   UC_LEASETITLE, UC_JOACLAUSE, UC_LANDMANQA, UC_ADDILIGENCE,
   UC_NPTI, UC_CONTRACTDR, UC_FPSOUPT, UC_FPSOKNOW,
@@ -4267,6 +4399,8 @@ function renderResults() {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> Emergency POs/yr: <strong>${fmtNum(result.context.emergencyPOs)}</strong> · Maverick spend baseline: <strong>${fmtUSD(result.context.maverickSpend)}</strong> · Buyer hrs saved per PO: <strong>${fmtNum(result.context.hoursSavedPerPO, 1)}</strong> · Late deliveries/yr: <strong>${fmtNum(result.context.lateDeliveries)}</strong>. Inventory carrying-cost savings and emergency-order premium avoidance are the largest value pools. Conservative: excludes demand-signal value to upstream production planning and supplier-relationship renegotiation leverage.</div>`;
   } else if (uc.id === 'crude') {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> Annual change requests: <strong>${fmtNum(result.context.annualReqs)}</strong> · Conflicted requests/yr: <strong>${fmtNum(result.context.conflictReqs)}</strong> · Confirmation cycle time saved: <strong>${fmtNum(result.context.hrsSaved, 1)} hrs</strong>. Scheduler labor and conflict resolution dominate the value stack. Conservative: excludes commercial value of shipper retention from faster service levels and downstream batch-sequencing optimization upside.</div>`;
+  } else if (uc.id === 'hazardimg') {
+    caveatHTML = `<div class="caveat"><strong>Context:</strong> Reports deflected/yr: <strong>${fmtNum(result.context.deflectedReports)}</strong> · Total truck rolls saved: <strong>${fmtNum(result.context.truckRollsSaved)}</strong> · Crew hrs saved per job: <strong>${fmtNum(result.context.hrsSavedPerJob, 1)}</strong> · Safety incidents avoided: <strong>${fmtNum(result.context.incidentsAvoided)}</strong>. Truck roll deflection is the largest driver — 38% deflection rate is conservative relative to pilot programs showing 40–55% of consumer-submitted reports are non-emergency or vegetative contact classifiable as scheduled work. Y1 at 45% reflects image classification model training time on utility-specific infrastructure types. Key inputs to validate in discovery: current dispatch rate, fully-loaded cost per truck roll, and annual hazard report volume. Conservative: excludes regulatory rate case benefit from improved SAIDI/SAIFI, customer satisfaction lift from faster hazard acknowledgment, and insurance premium reduction from lower incident frequency.</div>`;
   } else if (uc.id === 'revprot') {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> NTL exposure: <strong>${fmtUSD(result.context.ntlExposure)}</strong> · Additional NTL identified/yr: <strong>${fmtUSD(result.context.additionalNTLFound)}</strong> · Unnecessary field visits avoided: <strong>${fmtNum(result.context.falsePosReduced)}</strong>. NTL recovery dominates the value stack. Conservative: excludes revenue-at-risk from regulatory scrutiny of high NTL rates and does not model reduced regulatory penalty exposure.</div>`;
   } else if (uc.id === 'billinq') {
