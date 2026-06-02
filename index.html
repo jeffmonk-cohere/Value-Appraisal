@@ -2103,6 +2103,7 @@ const TAXONOMY = {
         { name: 'Interconnection study automation', priority:'Medium', agentType:'DER / Workflow',     kpis:'Study cycle time, queue backlog, cost per application',                 valueDriver:'Cost Reduction / Efficiency',    modelId: null },
         { name: 'Storm hardening prioritization',   priority:'High',   agentType:'Resilience / Risk',  kpis:'Capital at-risk reduction, customer minutes interrupted per storm',    valueDriver:'Revenue / Production Uplift',    modelId: null },
         { name: 'Consumer hazard image triage',      priority:'High',   agentType:'Vision AI / Workflow',kpis:'Truck rolls deflected %, repeat dispatch rate, veg outages avoided, crew safety incidents', valueDriver:'Cost Reduction / Efficiency', modelId: 'hazardimg' },
+        { name: 'Vegetation management intelligence',  priority:'High',   agentType:'Vision AI / Analytics',kpis:'Contractor discrepancy rate, overpayment recovery, veg outages avoided, SAIDI improvement', valueDriver:'Cost Reduction / Efficiency', modelId: 'vegmgmt'   },
       ],
       'AMI / Customer': [
         { name: 'Demand response orchestration',    priority:'High',   agentType:'Customer / Optimization', kpis:'MW dispatched vs target, customer performance rate, DR event cost', valueDriver:'Revenue / Production Uplift', modelId: null },
@@ -3967,6 +3968,147 @@ const UC_HAZARDIMG = {
   },
 };
 
+
+// ============================================================
+// USE CASE — VEGETATION MANAGEMENT INTELLIGENCE
+// Power & Utilities · Transmission & Distribution
+// ============================================================
+// Agent applies vision AI to drone, satellite, and mobile
+// patrol imagery to: (1) verify contractor completion and
+// clearance compliance, (2) build dynamic risk scores per span
+// to replace calendar-based patrol cycles with risk-based
+// routing, and (3) identify fast-growing encroachment before
+// conductor contact.
+//
+const UC_VEGMGMT = {
+  id: 'vegmgmt',
+  icon: Icons.safety,
+  name: 'Vegetation Management Intelligence',
+  meta: 'Power & Utilities · T&D',
+  title: 'Vegetation Management <em>Intelligence</em>',
+  eyebrow: 'Use Case · 09',
+  description: 'Vision AI applied to drone, satellite, and mobile patrol imagery to verify contractor vegetation work against completion reports, build dynamic risk scores per span for risk-based patrol routing, and identify fast-growing encroachment before conductor contact. Replaces calendar-driven trim cycles with a continuously updated risk model that prioritizes spend on high-risk spans, reduces contractor overpayment through automated compliance verification, and cuts vegetation-caused outages through earlier identification of encroachment.',
+  sections: [
+    { title: 'Service Territory & Program Scale', inputs: [
+      { id: 'circuit_miles',      label: 'Distribution circuit miles in service territory',  default: 18000, unit: 'miles',    key: true },
+      { id: 'trans_miles',        label: 'Transmission line miles (ROW managed)',            default: 1200,  unit: 'miles'               },
+      { id: 'veg_spend_yr',       label: 'Annual vegetation management spend',              default: 42000000, unit: '$',     key: true },
+      { id: 'contractor_share',   label: '% of veg work performed by contractors',          default: 0.85,  unit: '%', pct: true          },
+      { id: 'patrol_cycle_yrs',   label: 'Current patrol/trim cycle (years, baseline)',      default: 3.5,   unit: 'years',  key: true },
+    ]},
+    { title: 'Contractor Verification', inputs: [
+      { id: 'contractor_spend',   label: 'Annual contractor veg management spend',          default: 35700000, unit: '$',   key: true },
+      { id: 'discrepancy_rate',   label: '% of contractor reports with discrepancies',      default: 0.18,  unit: '%', pct: true, key: true },
+      { id: 'discrepancy_cost',   label: 'Avg cost to remediate per discrepancy found late', default: 4800, unit: '$',     key: true },
+      { id: 'overpayment_rate',   label: '% of invoices with overpayment (work not done)',  default: 0.08,  unit: '%', pct: true, key: true },
+      { id: 'agent_detect_rate',  label: 'Agent discrepancy detection rate',                default: 0.75,  unit: '%', pct: true, key: true },
+      { id: 'current_audit_pct',  label: 'Current audit coverage (% of completed work)',   default: 0.06,  unit: '%', pct: true           },
+    ]},
+    { title: 'Risk-Based Patrol Optimization', inputs: [
+      { id: 'inspection_spend',   label: 'Annual inspection / patrol spend',                default: 6500000, unit: '$',   key: true },
+      { id: 'miles_per_inspector',label: 'Circuit miles per inspector per year (baseline)', default: 420,   unit: 'mi/yr'               },
+      { id: 'risk_routing_eff',   label: 'Inspection efficiency gain — risk routing',       default: 0.30,  unit: '%', pct: true, key: true },
+      { id: 'high_risk_pct',      label: '% of circuit miles classified high-risk',         default: 0.22,  unit: '%', pct: true, key: true },
+      { id: 'cycle_compression',  label: 'High-risk cycle compression (e.g. 3.5yr → 1yr)', default: 0.65,  unit: '%', pct: true           },
+      { id: 'low_risk_extension', label: 'Low-risk cycle extension (e.g. 3.5yr → 5yr)',    default: 0.40,  unit: '%', pct: true           },
+    ]},
+    { title: 'Outage Reduction', inputs: [
+      { id: 'veg_outages_yr',     label: 'Vegetation-caused outage events per year',        default: 520,   unit: 'events', key: true },
+      { id: 'cost_per_veg_outage',label: 'Avg fully-loaded cost per vegetation outage',     default: 12500, unit: '$',      key: true },
+      { id: 'early_detect_red',   label: 'Outage reduction — earlier encroachment ID',      default: 0.22,  unit: '%', pct: true, key: true },
+      { id: 'nerc_exposure',      label: 'Annual NERC FAC-003 violation exposure (trans)',  default: 1800000, unit: '$',    key: true },
+      { id: 'nerc_red',           label: 'NERC exposure reduction (agent)',                 default: 0.40,  unit: '%', pct: true           },
+      { id: 'saidi_value_min',    label: 'Value per SAIDI minute improvement ($/cust·min)', default: 2.80,  unit: '$',                    },
+      { id: 'customers',          label: 'Customers served',                                default: 650000, unit: 'customers'             },
+      { id: 'saidi_improvement',  label: 'SAIDI improvement from veg outage reduction (min)', default: 2.8, unit: 'min'                  },
+    ]},
+    { title: 'Contractor Bid Optimization', inputs: [
+      { id: 'bid_packages_yr',    label: 'Vegetation work bid packages per year',           default: 24,    unit: 'packages'              },
+      { id: 'avg_package_value',  label: 'Avg bid package value',                          default: 1500000, unit: '$'                   },
+      { id: 'contingency_reduction', label: 'Contingency & change order reduction (agent-defined scopes)', default: 0.08, unit: '%', pct: true, key: true },
+    ]},
+    { title: 'Cohere North Platform', inputs: [
+      { id: 'users_y1', label: 'Users — Year 1', default: 120,   unit: 'users', key: true },
+      { id: 'users_y2', label: 'Users — Year 2', default: 600,   unit: 'users', key: true },
+      { id: 'users_y3', label: 'Users — Year 3', default: 1500,  unit: 'users', key: true },
+      { id: 'fee_y1',   label: 'Cohere fee — Year 1', default: 450000,  unit: '$', key: true },
+      { id: 'fee_y2',   label: 'Cohere fee — Year 2', default: 2000000, unit: '$', key: true },
+      { id: 'fee_y3',   label: 'Cohere fee — Year 3', default: 4500000, unit: '$', key: true },
+      { id: 'rf_y1',    label: 'Value realization — Y1', default: 0.40, unit: '%', pct: true, key: true },
+      { id: 'rf_y2',    label: 'Value realization — Y2', default: 0.80, unit: '%', pct: true, key: true },
+      { id: 'rf_y3',    label: 'Value realization — Y3', default: 1.00, unit: '%', pct: true, key: true },
+    ]},
+  ],
+  compute(i) {
+    // DRIVER 1: Contractor discrepancy detection
+    // Agent flags discrepancies in contractor completion reports at 75% detection rate
+    // vs. current 6% manual audit coverage
+    const totalCompletedWork = i.contractor_spend;
+    const discrepancyCostBase = i.contractor_spend * i.discrepancy_rate
+      * i.agent_detect_rate * i.discrepancy_cost / 1000; // scaled: cost per $ of work
+    // More defensible: discrepancy events × remediation cost saving
+    const discrepancyEventsYr = (i.circuit_miles + i.trans_miles) / 5 * i.discrepancy_rate; // ~1 completion report per 5 miles
+    const discrepancyBase = discrepancyEventsYr * i.agent_detect_rate * i.discrepancy_cost;
+
+    // DRIVER 2: Contractor overpayment recovery
+    const overpayBase = i.contractor_spend * i.overpayment_rate * i.agent_detect_rate;
+
+    // DRIVER 3: Inspection efficiency (risk-based routing)
+    const inspEffBase = i.inspection_spend * i.risk_routing_eff;
+
+    // DRIVER 4: Vegetation-caused outage reduction
+    const outageBase = i.veg_outages_yr * i.early_detect_red * i.cost_per_veg_outage;
+
+    // DRIVER 5: SAIDI regulatory value
+    const saidiBase = i.customers * i.saidi_improvement * i.saidi_value_min * i.early_detect_red;
+
+    // DRIVER 6: NERC violation exposure reduction (transmission)
+    const nercBase = i.nerc_exposure * i.nerc_red;
+
+    // DRIVER 7: Contractor bid contingency reduction
+    const bidBase = i.bid_packages_yr * i.avg_package_value * i.contingency_reduction;
+
+    const years = [
+      { rf: i.rf_y1, users: i.users_y1, fee: i.fee_y1 },
+      { rf: i.rf_y2, users: i.users_y2, fee: i.fee_y2 },
+      { rf: i.rf_y3, users: i.users_y3, fee: i.fee_y3 },
+    ];
+    const rows = years.map(y => ({
+      discrepancy: discrepancyBase * y.rf,
+      overpay:     overpayBase     * y.rf,
+      inspeff:     inspEffBase     * y.rf,
+      outage:      outageBase      * y.rf,
+      saidi:       saidiBase       * y.rf,
+      nerc:        nercBase        * y.rf,
+      bid:         bidBase         * y.rf,
+      users: y.users, fee: y.fee,
+    }));
+    rows.forEach(r => {
+      r.gross = r.discrepancy + r.overpay + r.inspeff + r.outage + r.saidi + r.nerc + r.bid;
+      r.net   = r.gross - r.fee;
+      r.roi   = r.gross / (r.fee || 1);
+    });
+    return {
+      years: rows,
+      drivers: [
+        { name: 'Contractor discrepancy detection',  key: 'discrepancy' },
+        { name: 'Contractor overpayment recovery',   key: 'overpay'     },
+        { name: 'Inspection efficiency — risk routing', key: 'inspeff'  },
+        { name: 'Vegetation outage reduction',       key: 'outage'      },
+        { name: 'SAIDI regulatory value',            key: 'saidi'       },
+        { name: 'NERC violation exposure reduction', key: 'nerc'        },
+        { name: 'Contractor bid optimization',       key: 'bid'         },
+      ],
+      context: {
+        totalCircuitMiles:    i.circuit_miles + i.trans_miles,
+        discrepancyEventsYr:  Math.round(discrepancyEventsYr),
+        overpayRecovery:      Math.round(overpayBase),
+        outagesAvoided:       Math.round(i.veg_outages_yr * i.early_detect_red),
+      },
+    };
+  },
+};
+
 // Map modelId to sector for tab activation
 const MODEL_SECTOR = {
   field: 'upstream', safety: 'upstream', prod: 'upstream',
@@ -3974,6 +4116,7 @@ const MODEL_SECTOR = {
   crude: 'midstream',
   revprot: 'power', billinq: 'power', payrisk: 'power', billex: 'power',
   hazardimg: 'power',
+  vegmgmt: 'power',
   nucspare: 'power', nucdata: 'power', nuctrouble: 'power', nucdoc: 'power',
   leasetitle: 'upstream', joaclause: 'upstream', landmanqa: 'upstream', addiligence: 'upstream',
   npti: 'upstream', contractdr: 'upstream', fpsoupt: 'upstream', fpsoknow: 'upstream',
@@ -3982,7 +4125,7 @@ const MODEL_SECTOR = {
 const USE_CASES = [
   UC_FIELD, UC_SAFETY, UC_PROD, UC_JOBPLAN, UC_WORKFORCE, UC_MRO,
   UC_CRUDE,
-  UC_REVPROT, UC_BILLINQ, UC_PAYRISK, UC_BILLEX, UC_HAZARDIMG,
+  UC_REVPROT, UC_BILLINQ, UC_PAYRISK, UC_BILLEX, UC_HAZARDIMG, UC_VEGMGMT,
   UC_NUCSPARE, UC_NUCDATA, UC_NUCTROUBLE, UC_NUCDOC,
   UC_LEASETITLE, UC_JOACLAUSE, UC_LANDMANQA, UC_ADDILIGENCE,
   UC_NPTI, UC_CONTRACTDR, UC_FPSOUPT, UC_FPSOKNOW,
@@ -4399,6 +4542,8 @@ function renderResults() {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> Emergency POs/yr: <strong>${fmtNum(result.context.emergencyPOs)}</strong> · Maverick spend baseline: <strong>${fmtUSD(result.context.maverickSpend)}</strong> · Buyer hrs saved per PO: <strong>${fmtNum(result.context.hoursSavedPerPO, 1)}</strong> · Late deliveries/yr: <strong>${fmtNum(result.context.lateDeliveries)}</strong>. Inventory carrying-cost savings and emergency-order premium avoidance are the largest value pools. Conservative: excludes demand-signal value to upstream production planning and supplier-relationship renegotiation leverage.</div>`;
   } else if (uc.id === 'crude') {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> Annual change requests: <strong>${fmtNum(result.context.annualReqs)}</strong> · Conflicted requests/yr: <strong>${fmtNum(result.context.conflictReqs)}</strong> · Confirmation cycle time saved: <strong>${fmtNum(result.context.hrsSaved, 1)} hrs</strong>. Scheduler labor and conflict resolution dominate the value stack. Conservative: excludes commercial value of shipper retention from faster service levels and downstream batch-sequencing optimization upside.</div>`;
+  } else if (uc.id === 'vegmgmt') {
+    caveatHTML = `<div class="caveat"><strong>Context:</strong> Total T&D miles: <strong>${fmtNum(result.context.totalCircuitMiles)}</strong> · Discrepancy events/yr flagged: <strong>${fmtNum(result.context.discrepancyEventsYr)}</strong> · Overpayment recovered/yr: <strong>${fmtUSD(result.context.overpayRecovery)}</strong> · Outages avoided/yr: <strong>${fmtNum(result.context.outagesAvoided)}</strong>. Contractor overpayment recovery and discrepancy detection are the most immediate value drivers — recoverable in Y1 as soon as the agent is processing completion imagery. Inspection efficiency gain requires integration with existing mobile workforce management system. Y1 realization at 40% reflects vision model training time on utility-specific tree species and conductor clearance standards. Conservative: excludes rate case regulatory benefit from SAIDI improvement, insurance premium reduction from lower vegetation incident frequency, and avoided NERC civil penalty exposure beyond the modeled FAC-003 amount. Key inputs to validate: annual contractor spend, current audit coverage rate, and vegetation outage count from CAIDI/SAIDI reports.</div>`;
   } else if (uc.id === 'hazardimg') {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> Reports deflected/yr: <strong>${fmtNum(result.context.deflectedReports)}</strong> · Total truck rolls saved: <strong>${fmtNum(result.context.truckRollsSaved)}</strong> · Crew hrs saved per job: <strong>${fmtNum(result.context.hrsSavedPerJob, 1)}</strong> · Safety incidents avoided: <strong>${fmtNum(result.context.incidentsAvoided)}</strong>. Truck roll deflection is the largest driver — 38% deflection rate is conservative relative to pilot programs showing 40–55% of consumer-submitted reports are non-emergency or vegetative contact classifiable as scheduled work. Y1 at 45% reflects image classification model training time on utility-specific infrastructure types. Key inputs to validate in discovery: current dispatch rate, fully-loaded cost per truck roll, and annual hazard report volume. Conservative: excludes regulatory rate case benefit from improved SAIDI/SAIFI, customer satisfaction lift from faster hazard acknowledgment, and insurance premium reduction from lower incident frequency.</div>`;
   } else if (uc.id === 'revprot') {
