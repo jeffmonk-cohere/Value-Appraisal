@@ -2044,6 +2044,7 @@ const TAXONOMY = {
       { name: 'Leak detection & response',        priority:'High',   agentType:'Real-Time Operations',  kpis:'Leak detection time, volume lost, safety incident rate',                valueDriver:'Revenue / Production Uplift',    modelId: null },
       { name: 'Compression scheduling optimizer', priority:'High',   agentType:'Optimization',          kpis:'Fuel gas savings $/Mcf, compressor utilization %, throughput variance', valueDriver:'Revenue / Production Uplift',    modelId: null },
       { name: 'Crude movement change management', priority:'High',   agentType:'Workflow Automation',   kpis:'Scheduler hrs/request, confirm cycle time, apportionment error rate',   valueDriver:'Cost Reduction / Efficiency',    modelId: 'crude' },
+      { name: 'Fractionation commercial & ops intel', priority:'High',  agentType:'Decision Intelligence', kpis:'Ethane recovery yield, imbalance events, off-spec penalties, recon hrs',   valueDriver:'Revenue / Production Uplift',    modelId: 'fracopt' },
       { name: 'Nomination & scheduling assistant',priority:'Medium', agentType:'Workflow Automation',   kpis:'Scheduling error rate, manual FTE hours saved, shipper satisfaction',   valueDriver:'Cost Reduction / Efficiency',    modelId: null },
       { name: 'NGL fractionation optimization',   priority:'High',   agentType:'Process Control',       kpis:'Product yield %, energy cost/unit, spec violation rate',                valueDriver:'Revenue / Production Uplift',    modelId: null },
       { name: 'Tariff & regulatory filing',       priority:'Medium', agentType:'Workflow Automation',   kpis:'Filing on-time rate, staff hours saved, compliance risk score',         valueDriver:'Cost Reduction / Efficiency',    modelId: null },
@@ -4109,11 +4110,170 @@ const UC_VEGMGMT = {
   },
 };
 
+
+// ============================================================
+// USE CASE — FRACTIONATION COMMERCIAL & OPERATIONS INTELLIGENCE
+// Midstream · NGL Fractionation & Marketing
+// ============================================================
+// Agent sits on the commercial and operational decision layer
+// above the DCS — monitoring NGL prices, contract positions,
+// plant inlet conditions, and producer allocations to optimize
+// ethane recovery/rejection decisions, automate imbalance
+// reconciliation, and accelerate maintenance timing decisions.
+// Replaces spreadsheets and tribal knowledge with a continuously
+// updated decision intelligence layer.
+//
+const UC_FRACOPT = {
+  id: 'fracopt',
+  icon: Icons.crude,
+  name: 'Fractionation Commercial & Operations Intelligence',
+  meta: 'Midstream · NGL Fractionation',
+  title: 'Fractionation <em>Commercial & Operations Intelligence</em>',
+  eyebrow: 'Use Case · 08',
+  description: 'Agentic decision intelligence layer above the DCS for NGL fractionation operations. Agent monitors real-time NGL and natural gas prices, contract positions, plant inlet conditions, and producer allocation data to recommend ethane recovery/rejection disposition continuously, automate producer-customer imbalance reconciliation, flag off-spec blend risk before delivery, and optimize maintenance window timing against NGL forward curves. Eliminates the spreadsheet-and-analyst layer that today delays commercial decisions by hours and produces allocation errors that require expensive cash-out resolution.',
+  sections: [
+    { title: 'Plant & Commercial Scale', inputs: [
+      { id: 'frac_trains',         label: 'Fractionation trains in scope',                   default: 4,       unit: 'trains',   key: true },
+      { id: 'plant_capacity_mbpd', label: 'Total fractionation capacity (Mbbl/d)',           default: 280,     unit: 'Mbbl/d',   key: true },
+      { id: 'ngl_realiz_bbl',      label: 'Avg blended NGL realization ($/bbl)',             default: 28,      unit: '$/bbl',    key: true },
+      { id: 'producer_contracts',  label: 'Active producer-customer contracts',              default: 85,      unit: 'contracts'           },
+      { id: 'commercial_ftes',     label: 'Commercial analysts + schedulers (FTEs)',         default: 18,      unit: 'FTEs',     key: true },
+      { id: 'commercial_rate',     label: 'Fully-loaded commercial analyst $/hr',            default: 88,      unit: '$/hr',     key: true },
+    ]},
+    { title: 'Ethane Recovery / Rejection Optimization', inputs: [
+      { id: 'ethane_vol_mbpd',     label: 'Ethane volume recoverable at full recovery (Mbbl/d)', default: 55, unit: 'Mbbl/d',  key: true },
+      { id: 'ethane_c3_spread',    label: 'Avg ethane-to-propane price spread ($/gal)',      default: 0.22,    unit: '$/gal'               },
+      { id: 'decision_lag_hrs',    label: 'Current ethane disposition decision lag (hours)', default: 6.0,     unit: 'hrs',      key: true },
+      { id: 'decision_lag_future', label: 'Decision lag with agent (hours)',                 default: 0.5,     unit: 'hrs',      key: true },
+      { id: 'price_move_per_hr',   label: 'Avg price volatility per hour ($/gal)',           default: 0.008,   unit: '$/gal'               },
+      { id: 'recovery_opt_pct',    label: 'Recovery yield improvement (better timing)',      default: 0.008,   unit: '%', pct: true, key: true },
+    ]},
+    { title: 'Allocation & Imbalance Reconciliation', inputs: [
+      { id: 'alloc_hrs_month',     label: 'Analyst hours/month on allocation reconciliation', default: 340,   unit: 'hrs/mo',   key: true },
+      { id: 'alloc_red',           label: 'Reconciliation time reduction (agent)',            default: 0.65,   unit: '%', pct: true, key: true },
+      { id: 'imbalance_events_yr', label: 'Cash-out imbalance events per year',              default: 28,     unit: 'events',   key: true },
+      { id: 'imbalance_cost',      label: 'Avg cost per cash-out imbalance resolution',      default: 45000,  unit: '$',        key: true },
+      { id: 'imbalance_red',       label: 'Imbalance reduction (better real-time reconciliation)', default: 0.45, unit: '%', pct: true, key: true },
+    ]},
+    { title: 'Product Quality & Spec Compliance', inputs: [
+      { id: 'offspec_events_yr',   label: 'Off-spec delivery events per year (baseline)',    default: 14,     unit: 'events',   key: true },
+      { id: 'offspec_penalty',     label: 'Avg penalty per off-spec delivery',               default: 85000,  unit: '$',        key: true },
+      { id: 'offspec_red',         label: 'Off-spec event reduction (real-time blend monitoring)', default: 0.55, unit: '%', pct: true, key: true },
+      { id: 'batch_contamination_yr', label: 'Batch contamination events per year',         default: 6,      unit: 'events'              },
+      { id: 'contamination_cost',  label: 'Avg cost per contamination event',               default: 220000, unit: '$',        key: true },
+      { id: 'contamination_red',   label: 'Contamination reduction (agent blend sequencing)', default: 0.40, unit: '%', pct: true, key: true },
+    ]},
+    { title: 'Maintenance Window Optimization', inputs: [
+      { id: 'turnarounds_yr',      label: 'Planned turnarounds per year (all trains)',       default: 3,      unit: 'turnarounds'          },
+      { id: 'ta_duration_days',    label: 'Avg turnaround duration (days)',                  default: 22,     unit: 'days'                 },
+      { id: 'timing_days_saved',   label: 'Avg days of better timing vs. current scheduling', default: 2.5,  unit: 'days',     key: true  },
+      { id: 'lost_margin_per_day', label: 'Lost margin per train-day offline ($/day)',       default: 320000, unit: '$/day',    key: true  },
+    ]},
+    { title: 'Regulatory & Compliance Reporting', inputs: [
+      { id: 'reg_hrs_month',       label: 'Analyst hours/month on regulatory & producer statements', default: 120, unit: 'hrs/mo', key: true },
+      { id: 'reg_red',             label: 'Regulatory reporting time reduction (agent)',    default: 0.55,   unit: '%', pct: true, key: true },
+      { id: 'compliance_errors_yr','label': 'Filing errors / corrections per year',         default: 8,      unit: 'events'               },
+      { id: 'correction_cost',     label: 'Avg cost per filing correction or amendment',    default: 28000,  unit: '$'                    },
+    ]},
+    { title: 'Cohere North Platform', inputs: [
+      { id: 'users_y1', label: 'Users — Year 1', default: 75,    unit: 'users', key: true },
+      { id: 'users_y2', label: 'Users — Year 2', default: 350,   unit: 'users', key: true },
+      { id: 'users_y3', label: 'Users — Year 3', default: 800,   unit: 'users', key: true },
+      { id: 'fee_y1',   label: 'Cohere fee — Year 1', default: 350000,  unit: '$', key: true },
+      { id: 'fee_y2',   label: 'Cohere fee — Year 2', default: 1500000, unit: '$', key: true },
+      { id: 'fee_y3',   label: 'Cohere fee — Year 3', default: 3500000, unit: '$', key: true },
+      { id: 'rf_y1',    label: 'Value realization — Y1', default: 0.40, unit: '%', pct: true, key: true },
+      { id: 'rf_y2',    label: 'Value realization — Y2', default: 0.80, unit: '%', pct: true, key: true },
+      { id: 'rf_y3',    label: 'Value realization — Y3', default: 1.00, unit: '%', pct: true, key: true },
+    ]},
+  ],
+  compute(i) {
+    // DRIVER 1: Ethane recovery/rejection optimization
+    // Shorter decision lag means fewer hours of sub-optimal disposition
+    // at real price differentials
+    const lagHrsSaved   = i.decision_lag_hrs - i.decision_lag_future;
+    // Value of faster decision: ethane vol × price volatility × hours saved × operating days
+    // ETHANE DECISION TIMING VALUE
+    // Volume at risk per hour × hours saved per event × spread × decision events/yr
+    // Uses $/bbl opportunity cost of wrong ethane disposition (not full price)
+    const bblPerHr = i.ethane_vol_mbpd * 1000 / 24;
+    const ethaneDecisionBase = bblPerHr * lagHrsSaved * 0.15 * 120; // $0.15/bbl spread, 120 reversal events/yr
+    // Structural yield improvement: better always-on monitoring lifts recovery rate
+    const ethaneYieldBase = i.ethane_vol_mbpd * 1000 * 365
+      * i.recovery_opt_pct * i.ngl_realiz_bbl;
+    const ethaneBase = ethaneDecisionBase + ethaneYieldBase;
+
+    // DRIVER 2: Allocation reconciliation labor savings
+    const allocBase = i.alloc_hrs_month * 12 * i.alloc_red * i.commercial_rate;
+
+    // DRIVER 3: Cash-out imbalance reduction
+    const imbalanceBase = i.imbalance_events_yr * i.imbalance_red * i.imbalance_cost;
+
+    // DRIVER 4: Off-spec delivery penalty avoidance
+    const offspecBase = i.offspec_events_yr * i.offspec_red * i.offspec_penalty;
+
+    // DRIVER 5: Batch contamination reduction
+    const contamBase = i.batch_contamination_yr * i.contamination_red * i.contamination_cost;
+
+    // DRIVER 6: Maintenance timing optimization
+    const maintBase = i.turnarounds_yr * i.timing_days_saved * i.lost_margin_per_day;
+
+    // DRIVER 7: Regulatory / producer statement efficiency
+    const regBase = i.reg_hrs_month * 12 * i.reg_red * i.commercial_rate;
+
+    // DRIVER 8: Analyst productivity (general commercial ops)
+    const analystBase = i.commercial_ftes * 2000 * 0.25 * i.commercial_rate; // 25% of time on data reconciliation tasks
+
+    const years = [
+      { rf: i.rf_y1, users: i.users_y1, fee: i.fee_y1 },
+      { rf: i.rf_y2, users: i.users_y2, fee: i.fee_y2 },
+      { rf: i.rf_y3, users: i.users_y3, fee: i.fee_y3 },
+    ];
+    const rows = years.map(y => ({
+      ethane:    ethaneBase    * y.rf,
+      alloc:     allocBase     * y.rf,
+      imbalance: imbalanceBase * y.rf,
+      offspec:   offspecBase   * y.rf,
+      contam:    contamBase    * y.rf,
+      maint:     maintBase     * y.rf,
+      reg:       regBase       * y.rf,
+      analyst:   analystBase   * y.rf,
+      users: y.users, fee: y.fee,
+    }));
+    rows.forEach(r => {
+      r.gross = r.ethane + r.alloc + r.imbalance + r.offspec
+              + r.contam + r.maint + r.reg + r.analyst;
+      r.net   = r.gross - r.fee;
+      r.roi   = r.gross / (r.fee || 1);
+    });
+    return {
+      years: rows,
+      drivers: [
+        { name: 'Ethane recovery / rejection optimization', key: 'ethane'    },
+        { name: 'Allocation reconciliation labor savings',  key: 'alloc'     },
+        { name: 'Cash-out imbalance reduction',             key: 'imbalance' },
+        { name: 'Off-spec delivery penalty avoidance',      key: 'offspec'   },
+        { name: 'Batch contamination reduction',            key: 'contam'    },
+        { name: 'Maintenance timing optimization',          key: 'maint'     },
+        { name: 'Regulatory reporting efficiency',          key: 'reg'       },
+        { name: 'Commercial analyst productivity',          key: 'analyst'   },
+      ],
+      context: {
+        lagHrsSaved:       Math.round(lagHrsSaved * 10) / 10,
+        imbalancesAvoided: Math.round(i.imbalance_events_yr * i.imbalance_red),
+        offspecAvoided:    Math.round(i.offspec_events_yr * i.offspec_red),
+        timingDaysSaved:   i.timing_days_saved * i.turnarounds_yr,
+      },
+    };
+  },
+};
+
 // Map modelId to sector for tab activation
 const MODEL_SECTOR = {
   field: 'upstream', safety: 'upstream', prod: 'upstream',
   jobplan: 'upstream', workforce: 'upstream', mro: 'upstream',
   crude: 'midstream',
+  fracopt: 'midstream',
   revprot: 'power', billinq: 'power', payrisk: 'power', billex: 'power',
   hazardimg: 'power',
   vegmgmt: 'power',
@@ -4124,7 +4284,7 @@ const MODEL_SECTOR = {
 
 const USE_CASES = [
   UC_FIELD, UC_SAFETY, UC_PROD, UC_JOBPLAN, UC_WORKFORCE, UC_MRO,
-  UC_CRUDE,
+  UC_CRUDE, UC_FRACOPT,
   UC_REVPROT, UC_BILLINQ, UC_PAYRISK, UC_BILLEX, UC_HAZARDIMG, UC_VEGMGMT,
   UC_NUCSPARE, UC_NUCDATA, UC_NUCTROUBLE, UC_NUCDOC,
   UC_LEASETITLE, UC_JOACLAUSE, UC_LANDMANQA, UC_ADDILIGENCE,
@@ -4540,6 +4700,8 @@ function renderResults() {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> Days saved per req: <strong>${fmtNum(result.context.daysSavedPerReq, 0)}</strong> · Certification-gap reduction: <strong>${fmtPct(result.context.gapRateDelta, 1)}</strong>. Recruiting & time-to-fill typically dominates the value stack; certification-gap avoidance is the highest-leverage operational driver.</div>`;
   } else if (uc.id === 'mro') {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> Emergency POs/yr: <strong>${fmtNum(result.context.emergencyPOs)}</strong> · Maverick spend baseline: <strong>${fmtUSD(result.context.maverickSpend)}</strong> · Buyer hrs saved per PO: <strong>${fmtNum(result.context.hoursSavedPerPO, 1)}</strong> · Late deliveries/yr: <strong>${fmtNum(result.context.lateDeliveries)}</strong>. Inventory carrying-cost savings and emergency-order premium avoidance are the largest value pools. Conservative: excludes demand-signal value to upstream production planning and supplier-relationship renegotiation leverage.</div>`;
+  } else if (uc.id === 'fracopt') {
+    caveatHTML = `<div class="caveat"><strong>Context:</strong> Decision lag saved: <strong>${fmtNum(result.context.lagHrsSaved, 1)} hrs</strong> · Imbalances avoided/yr: <strong>${fmtNum(result.context.imbalancesAvoided)}</strong> · Off-spec events avoided/yr: <strong>${fmtNum(result.context.offspecAvoided)}</strong> · Turnaround timing days saved: <strong>${fmtNum(result.context.timingDaysSaved, 1)}</strong>. Ethane recovery optimization is the most volatile driver — value depends on the ethane-to-propane spread, which moves with NGL market conditions. Model uses $0.22/gal spread and 250 decision events/yr. Y1 at 40% reflects integration time with SCADA, gas measurement, and commercial scheduling systems. Key inputs to validate: current decision lag, imbalance frequency, and off-spec event history. Conservative: excludes NGL optionality value from better product routing and the relationship value of more accurate producer statements.</div>`;
   } else if (uc.id === 'crude') {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> Annual change requests: <strong>${fmtNum(result.context.annualReqs)}</strong> · Conflicted requests/yr: <strong>${fmtNum(result.context.conflictReqs)}</strong> · Confirmation cycle time saved: <strong>${fmtNum(result.context.hrsSaved, 1)} hrs</strong>. Scheduler labor and conflict resolution dominate the value stack. Conservative: excludes commercial value of shipper retention from faster service levels and downstream batch-sequencing optimization upside.</div>`;
   } else if (uc.id === 'vegmgmt') {
