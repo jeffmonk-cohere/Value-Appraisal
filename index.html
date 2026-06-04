@@ -919,6 +919,45 @@
     body { background: white; color: black; }
     .panel { border: 1px solid #ccc; background: white; }
   }
+/* ── Agent Framework Panel ─────────────────────────────── */
+#af-panel { display:none; padding:28px 32px 48px; overflow-y:auto; height:100%; }
+#af-panel.active { display:block; }
+.af-intro { max-width:780px; margin-bottom:28px; }
+.af-intro h2 { font-size:20px; font-weight:700; color:var(--text-0); margin-bottom:8px; }
+.af-intro p  { font-size:13px; color:var(--text-2); line-height:1.6; }
+.af-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; max-width:1100px; }
+@media(max-width:860px){ .af-grid{ grid-template-columns:1fr; } }
+.af-card {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+  padding:18px 20px 20px; display:flex; flex-direction:column; gap:10px;
+  border-left:3px solid transparent; transition:border-color .15s;
+}
+.af-card:hover { border-color:var(--accent); }
+.af-card-head { display:flex; align-items:flex-start; gap:12px; }
+.af-icon { width:34px; height:34px; border-radius:8px; display:flex; align-items:center;
+  justify-content:center; font-size:17px; flex-shrink:0; }
+.af-name { font-size:13.5px; font-weight:700; color:var(--text-0); line-height:1.3; }
+.af-tag  { font-size:10px; color:var(--text-3); margin-top:2px; }
+.af-desc { font-size:12px; color:var(--text-2); line-height:1.55; }
+.af-uc-lbl { font-size:10px; font-weight:700; letter-spacing:1.5px; color:var(--text-3);
+  text-transform:uppercase; margin-bottom:5px; }
+.af-chips { display:flex; flex-wrap:wrap; gap:5px; }
+.af-chip {
+  padding:3px 9px; border-radius:99px; font-size:10px; font-weight:500;
+  background:var(--bg-hover); border:1px solid var(--border); color:var(--text-2);
+  cursor:pointer; transition:all .12s; white-space:nowrap;
+}
+.af-chip:hover { background:var(--accent); border-color:var(--accent); color:#fff; }
+.af-tech { font-size:11px; color:var(--text-3); padding-top:8px; border-top:1px solid var(--border); }
+.af-tech b { color:var(--text-2); }
+.ic-doc  { background:rgba(77,110,229,.15);  }
+.ic-reg  { background:rgba(232,163,77,.15);  }
+.ic-anom { background:rgba(106,200,138,.15); }
+.ic-xtr  { background:rgba(255,130,102,.15); }
+.ic-wf   { background:rgba(180,130,255,.15); }
+.ic-opt  { background:rgba(77,200,229,.15);  }
+.ic-cx   { background:rgba(255,180,80,.15);  }
+
 </style>
 </head>
 <body>
@@ -949,6 +988,8 @@
   </aside>
 
   <main class="main" id="main">
+    <!-- Agent Framework Panel -->
+    <div id="af-panel"></div>
     <!-- Use case header -->
     <div class="uc-header" id="uc-header"></div>
 
@@ -4349,13 +4390,19 @@ function fmtROI(n) {
 function renderSidebar() {
   // ── Sector tabs ─────────────────────────────────────────
   const tabsEl = document.getElementById('sector-tabs');
-  tabsEl.innerHTML = Object.entries(TAXONOMY).map(([key, sector]) => `
+  const agentTabBtn = `<button class="sector-tab ${'__agents__' === state.activeSector ? 'active' : ''}" data-sector="__agents__" style="border-left:3px solid var(--accent);font-weight:600">⬡ Agents</button>`;
+  tabsEl.innerHTML = agentTabBtn + Object.entries(TAXONOMY).map(([key, sector]) => `
     <button class="sector-tab ${key === state.activeSector ? 'active' : ''}" data-sector="${key}">
       ${sector.label}
     </button>`).join('');
   tabsEl.querySelectorAll('.sector-tab').forEach(btn => {
     btn.addEventListener('click', () => {
       state.activeSector = btn.dataset.sector;
+      if (btn.dataset.sector === '__agents__') {
+        renderSidebar();
+        renderAgentPanel();
+        return;
+      }
       // If switching to a sector that has a live model, activate the first model there
       const sectorData = TAXONOMY[state.activeSector];
       const entries = sectorData.subFilter
@@ -4747,6 +4794,11 @@ function renderResults() {
 
 
 function renderAll() {
+  // Hide agent panel, restore workbench when viewing a use case
+  const afPanel   = document.getElementById('af-panel');
+  const workbench = document.querySelector('.workbench');
+  if (afPanel)   afPanel.classList.remove('active');
+  if (workbench) workbench.style.display = '';
   syncSectorFromActiveId();
   renderSidebar();
   renderHeader();
@@ -5038,6 +5090,152 @@ document.getElementById('btn-export').addEventListener('click', () => {
   } catch(e) { console.warn('Import error:', e); }
 })();
 renderAll();
+
+// ============================================================
+// AGENT FRAMEWORK PANEL
+// ============================================================
+const AGENT_TYPES = [
+  {
+    id: 'doc',
+    icon: '📄',
+    iconClass: 'ic-doc',
+    name: 'Document & Knowledge Retrieval Agent',
+    tagline: 'Semantic search over unstructured document corpora',
+    description: 'Ingests and semantically indexes unstructured documents — contracts, P&IDs, manuals, well files, title opinions, regulatory filings — and enables natural language retrieval with source citations. The most broadly deployed agent type in the North portfolio, underpinning more use cases than any other.',
+    useCases: ['Lease & Title Intelligence','JOA Clause Comparison','Landman Copilot / Q&A','A&D Diligence Acceleration','Nuclear Data Retrieval','Nuclear Deliverables Enhancement','Contract & Dayrate Intelligence','Field Technician Assistant'],
+    ucIds:    ['leasetitle','joaclause','landmanqa','addiligence','nucdata','nucdoc','contractdr','field'],
+    tech: 'Cohere Embed · Rerank · Command R+ · RAG pipeline · on-premise vector store',
+  },
+  {
+    id: 'reg',
+    icon: '⚖️',
+    iconClass: 'ic-reg',
+    name: 'Regulatory & Compliance Agent',
+    tagline: 'Maps activity against regulatory frameworks; tracks filing obligations',
+    description: 'Monitors operational activity and maps it against FERC, NERC, PHMSA, BSEE, NRC, and EPA regulatory frameworks. Tracks filing deadlines, drafts compliance submissions, and flags potential violations before they become reportable events. Applies across regulatory environments spanning pipeline, offshore, nuclear, and emissions programs.',
+    useCases: ['Nuclear Deliverables Enhancement','Consumer Hazard Image Triage','Safety Incident Agent','Vegetation Management Intelligence','Fractionation Commercial Intel','A&D Diligence (regulatory)'],
+    ucIds:    ['nucdoc','hazardimg','safety','vegmgmt','fracopt','addiligence'],
+    tech: 'Cohere Command R+ · regulatory ontology mapping · deadline tracking · NERC/FERC schema parsers',
+  },
+  {
+    id: 'anom',
+    icon: '📡',
+    iconClass: 'ic-anom',
+    name: 'Anomaly Detection & Monitoring Agent',
+    tagline: 'Pattern recognition over sensor, SCADA, and telemetry streams',
+    description: 'Applies time-series pattern recognition and ML-based anomaly detection over continuous sensor feeds, SCADA data, and operational telemetry to surface early warning signals before they escalate to failures or outages. Operates continuously across production, rig health, FPSO systems, pipeline integrity, and distribution grid events.',
+    useCases: ['FPSO Uptime & Predictive Maintenance','Rig Downtime & NPT Intelligence','Production Loss Recovery','Revenue Protection (NTL)','Vegetation Management Intelligence','Consumer Hazard Image Triage'],
+    ucIds:    ['fpsoupt','npti','prod','revprot','vegmgmt','hazardimg'],
+    tech: 'Sensor stream processing · time-series ML · SCADA integration · Cohere Command R+ for alert narration',
+  },
+  {
+    id: 'xtr',
+    icon: '🔍',
+    iconClass: 'ic-xtr',
+    name: 'Data Extraction & Structuring Agent',
+    tagline: 'Pulls structured fields from unstructured and semi-structured inputs',
+    description: 'Extracts structured data from messy inputs — scanned PDFs, EDI feeds, handwritten forms, email threads, and mixed-format spreadsheets. Normalizes output into downstream systems of record. Critical for use cases where the data gap between what exists and what the system needs is the primary operational friction.',
+    useCases: ['Lease & Title Document Intelligence','Billing Inquiry Resolution','Billing Exception Resolution','MRO Supply Chain Agent','Crude Movement Change Mgmt','Fractionation Allocation Reconciliation'],
+    ucIds:    ['leasetitle','billinq','billex','mro','crude','fracopt'],
+    tech: 'Cohere Command R+ · document layout parsing · entity extraction · schema normalization · ERP write-back',
+  },
+  {
+    id: 'wf',
+    icon: '🔄',
+    iconClass: 'ic-wf',
+    name: 'Workflow Orchestration & Case Management Agent',
+    tagline: 'Routes, assigns, and tracks multi-step human-in-loop processes',
+    description: 'Manages multi-step workflows with human decision points — routing work orders, escalating anomalies to the right team, tracking case status, and ensuring SLAs are met. Operates as the coordination layer between AI-generated recommendations and human action, maintaining a full audit trail across complex, cross-functional processes.',
+    useCases: ['Safety Incident Agent','Billing Exception Resolution','Workforce Operations Agent','Job Planning Agent','Consumer Hazard Image Triage','Vegetation Management Verification'],
+    ucIds:    ['safety','billex','workforce','jobplan','hazardimg','vegmgmt'],
+    tech: 'Agentic orchestration · Cohere Command R+ · human-in-loop checkpoints · CMMS / ERP integration',
+  },
+  {
+    id: 'opt',
+    icon: '⚙️',
+    iconClass: 'ic-opt',
+    name: 'Optimization & Recommendation Agent',
+    tagline: 'Continuous decision support over operational and commercial variables',
+    description: 'Monitors multi-variable operational and commercial environments in real time and generates prioritized recommendations — scheduling decisions, recovery actions, inventory reorder points, maintenance timing, and product routing. Replaces the spreadsheet-and-analyst layer with a continuously updated decision intelligence layer.',
+    useCases: ['Fractionation Commercial & Ops Intel','Job Planning Agent','Production Loss Recovery','MRO Supply Chain Agent','Nuclear Spare Part Reordering','Crude Movement Scheduling'],
+    ucIds:    ['fracopt','jobplan','prod','mro','nucspare','crude'],
+    tech: 'Cohere Command R+ · real-time data integration · constraint-based optimization · market data feeds',
+  },
+  {
+    id: 'cx',
+    icon: '👤',
+    iconClass: 'ic-cx',
+    name: 'Customer & Account Intelligence Agent',
+    tagline: 'Propensity modeling, segmentation, and account-level intelligence',
+    description: 'Applies ML-based propensity modeling, usage pattern analysis, and account segmentation to utility customer data to predict payment risk, identify theft and loss patterns, and route billing inquiries to the right resolution path. Operates over AMI data, billing history, and customer interaction records.',
+    useCases: ['Payment Risk Prediction Agent','Billing Inquiry Resolution','Revenue Protection Agent','Billing Exception Resolution'],
+    ucIds:    ['payrisk','billinq','revprot','billex'],
+    tech: 'Cohere Embed · propensity modeling · AMI data integration · CRM write-back · Cohere Command R+',
+  },
+];
+
+function renderAgentPanel() {
+  const afPanel = document.getElementById('af-panel');
+  const workbench = document.querySelector('.workbench');
+  const ucHeader  = document.getElementById('uc-header');
+
+  // Show panel, hide workbench content
+  afPanel.classList.add('active');
+  if (workbench) workbench.style.display = 'none';
+  if (ucHeader)  ucHeader.innerHTML = '';
+
+  // Hide sub-filter and use-case list when showing agents
+  const subEl = document.getElementById('sub-filter');
+  const listEl = document.getElementById('usecase-list');
+  if (subEl)  subEl.classList.add('hidden');
+  if (listEl) listEl.innerHTML = '';
+
+  afPanel.innerHTML = `
+    <div class="af-intro">
+      <h2>Cohere North &nbsp;·&nbsp; Agent Architecture</h2>
+      <p>Seven foundational agent types underpin all 26 use cases in the North energy portfolio. Customers deploying multiple use cases share agent infrastructure — the Document &amp; Knowledge Retrieval agent trained for lease intelligence also serves A&amp;D diligence and nuclear data retrieval. Click any use case chip to open its calculator.</p>
+    </div>
+    <div class="af-grid">
+      ${AGENT_TYPES.map(a => `
+        <div class="af-card">
+          <div class="af-card-head">
+            <div class="af-icon ${a.iconClass}">${a.icon}</div>
+            <div>
+              <div class="af-name">${a.name}</div>
+              <div class="af-tag">${a.tagline}</div>
+            </div>
+          </div>
+          <div class="af-desc">${a.description}</div>
+          <div>
+            <div class="af-uc-lbl">Use Cases</div>
+            <div class="af-chips">
+              ${a.useCases.map((uc, idx) => {
+                const ucId = a.ucIds[idx];
+                const ucDef = USE_CASES.find(u => u.id === ucId);
+                return `<span class="af-chip" data-uc-id="${ucId || ''}" title="${ucDef ? 'Open ' + ucDef.name : ''}">${uc}</span>`;
+              }).join('')}
+            </div>
+          </div>
+          <div class="af-tech"><b>Tech stack:</b> ${a.tech}</div>
+        </div>
+      `).join('')}
+    </div>`;
+
+  // Wire chip clicks → open the use case calculator
+  afPanel.querySelectorAll('.af-chip[data-uc-id]').forEach(chip => {
+    const ucId = chip.dataset.ucId;
+    if (!ucId) return;
+    chip.addEventListener('click', () => {
+      const match = USE_CASES.find(u => u.id === ucId);
+      if (!match) return;
+      state.activeId = ucId;
+      // Restore workbench visibility before renderAll
+      if (workbench) workbench.style.display = '';
+      renderAll();
+    });
+  });
+}
+
 
 // ============================================================
 // SLIDE GENERATOR — Appraisal_Output_Template style
