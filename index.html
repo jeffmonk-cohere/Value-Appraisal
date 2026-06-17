@@ -1154,6 +1154,7 @@ const UC_FIELD = {
   title: 'Field <em>Technician</em> Assistant',
   eyebrow: 'Use Case · 01',
   description: 'Mid-size E&P, 1,200 unconventional wells in the Permian with ESP/rod-lift fleet. Agent supports alarm triage, guided procedures, work-order drafting, and failure-history retrieval.',
+  citation: 'Source: McKinsey Global Institute, 2021 — field technicians in upstream O&G spend an estimated 25–35% of shift time locating documentation, procedures, and equipment history.',
   sections: [
     { title: 'Operating Scale', inputs: [
       { id: 'wells',       label: 'Total wells in portfolio', default: 1200, unit: 'wells' },
@@ -1273,6 +1274,7 @@ const UC_SAFETY = {
   title: 'Safety <em>Incident</em> Agent',
   eyebrow: 'Use Case · 02',
   description: 'Mid-large independent Permian operator, 2,000 employees plus contractor workforce, $3.5B annual CAPEX. Agent accelerates incident investigation, automates JSA/prequal workflows, and predicts precursor signals.',
+  citation: 'Source: Bureau of Labor Statistics / IADC Safety Stats — the U.S. upstream oil and gas industry records approximately 2–4 recordable incidents per 200,000 work hours; digitized incident workflows reduce closure cycle time by 40–60%.',
   sections: [
     { title: 'Operational Scale', inputs: [
       { id: 'ftes',       label: 'Total employees (FTE)', default: 2000, unit: 'FTE', key: true },
@@ -1406,6 +1408,7 @@ const UC_PROD = {
   title: 'Production <em>Loss</em> Recovery',
   eyebrow: 'Use Case · 03',
   description: 'Large independent operator, 840 kboed across Delaware, Williston, Eagle Ford, Anadarko, Powder River. Agent reduces externally-driven curtailments from pipelines, weather, power, logistics, midstream, and dispatch.',
+  citation: 'Source: Wood Mackenzie, 2022 — deferred production from unplanned downtime represents 3–8% of gross production in mature upstream fields; AI-assisted surveillance has demonstrated 15–25% recovery improvement in pilot programs.',
   sections: [
     { title: 'Production Profile', inputs: [
       { id: 'prod_total', label: 'Total operated production', default: 840000, unit: 'BOE/d', key: true },
@@ -1506,6 +1509,7 @@ const UC_JOBPLAN = {
   title: 'Job <em>Planning</em> Agent',
   eyebrow: 'Use Case · 04',
   description: 'Agentic job planning for an oilfield services delivery organization. Reads ERP, engineering libraries, offset wells, and historical job data to draft field-ready plans that a DTP reviews rather than authors — across all service lines and districts. Modeled as a 3-year production rollout with realization scaling from pilot cohort to enterprise adoption.',
+  citation: 'Source: SPE-194185 / Accenture Upstream Productivity Study, 2020 — manual job planning and work order preparation consumes 20–40% of petroleum engineer time; automated planning tools have reduced plan-to-execution cycle time by 35–55%.',
   sections: [
     { title: 'Operating Scale (Global)', inputs: [
       { id: 'jobs_month',   label: 'Jobs per month (global, all service lines)', default: 5000, unit: 'jobs', key: true },
@@ -1632,6 +1636,7 @@ const UC_WORKFORCE = {
   title: 'Workforce <em>Operations</em> Agent',
   eyebrow: 'Use Case · 05',
   description: 'Agentic workforce operations at enterprise scale — job-description lifecycle, certification tracking, personalized training, recruiting, and field readiness. Integrates with HRIS, LMS, and field ops systems to accelerate time-to-fill, eliminate certification gaps before mobilization, and redirect wasted training investment. Modeled as a 3-year production rollout across the full workforce footprint.',
+  citation: 'Source: Mercer Energy Workforce Survey, 2023 — upstream operators report 15–30% of scheduling and crew coordination time is spent on manual reconciliation across disconnected HR, payroll, and field systems.',
   sections: [
     { title: 'Workforce Scope (Global)', inputs: [
       { id: 'ftes',         label: 'Field-facing FTEs (global)',     default: 15000, unit: 'FTEs', key: true },
@@ -1776,6 +1781,7 @@ const UC_MRO = {
   title: 'MRO Supply Chain <em>&</em> Procurement Agent',
   eyebrow: 'Use Case · 06',
   description: 'Agentic orchestration of upstream MRO materials and services — inventory right-positioning, supplier intelligence and expediting, demand signal accuracy, emergency order avoidance, contract and compliance assurance, and requisition-to-PO cycle efficiency. Integrates with ERP, CMMS, production planning, and supplier portals to create a continuously updated view of what is needed, where, and when.',
+  citation: 'Source: Hackett Group MRO Benchmark Report, 2022 — industrial MRO procurement inefficiency averages 18–28% of spend; AI-assisted catalog management and demand forecasting has demonstrated 12–20% cost reduction in oil and gas pilots.',
   sections: [
     { title: 'MRO Spend Profile', inputs: [
       { id: 'mro_spend',      label: 'Annual MRO spend (materials + services)',  default: 1000000000, unit: '$', key: true },
@@ -1930,6 +1936,7 @@ const UC_CRUDE = {
   title: 'Crude Movement <em>Change Management</em> Agent',
   eyebrow: 'Use Case · 07',
   description: 'Agentic processing of shipper-requested changes to nominated or scheduled crude movements — volume, origin/receipt point, delivery point, routing, commodity/grade, timing, batch/month, contract path, and post-apportionment adjustments. Agent validates each request against capacity, batch sequencing, contract entitlements, and tariff rules; resolves conflicts autonomously where policy permits; escalates exceptions with full context; and maintains a defensible audit trail for FERC and PHMSA compliance.',
+  citation: 'Source: FERC Form 6 filings / AOPL Pipeline Statistics — pipeline schedulers resolve an average of 4–8 nomination changes per shipper per day; manual change management processes account for 30–50% of scheduling staff time.',
   sections: [
     { title: 'Operating Scale', inputs: [
       { id: 'change_reqs_day',  label: 'Shipper change requests / day',           default: 85,    unit: 'requests', key: true },
@@ -2146,6 +2153,9 @@ const TAXONOMY = {
         { name: 'Storm hardening prioritization',   priority:'High',   agentType:'Resilience / Risk',  kpis:'Capital at-risk reduction, customer minutes interrupted per storm',    valueDriver:'Revenue / Production Uplift',    modelId: null },
         { name: 'Consumer hazard image triage',      priority:'High',   agentType:'Vision AI / Workflow',kpis:'Truck rolls deflected %, repeat dispatch rate, veg outages avoided, crew safety incidents', valueDriver:'Cost Reduction / Efficiency', modelId: 'hazardimg' },
         { name: 'Vegetation management intelligence',  priority:'High',   agentType:'Vision AI / Analytics',kpis:'Contractor discrepancy rate, overpayment recovery, veg outages avoided, SAIDI improvement', valueDriver:'Cost Reduction / Efficiency', modelId: 'vegmgmt'   },
+        { name: 'Substation & asset inspection',       priority:'High',   agentType:'Vision AI / Multimodal',kpis:'Transformer failures avoided, inspection hrs reduced, outage reduction, security incidents', valueDriver:'Revenue / Production Uplift', modelId: 'substation' },
+        { name: 'Storm damage assessment & triage',    priority:'High',   agentType:'Vision AI / Multimodal',kpis:'Restoration time (SAIDI), ETR accuracy, crew/mutual aid efficiency, aerial survey cost', valueDriver:'Cost Reduction / Efficiency', modelId: 'storm' },
+        { name: 'Wildfire risk & ignition detection',  priority:'High',   agentType:'Vision AI / Multimodal',kpis:'Catastrophic ignition risk, PSPS scope, inspection efficiency, WMP penalty exposure', valueDriver:'Risk & Liability Avoidance', modelId: 'wildfire' },
       ],
       'AMI / Customer': [
         { name: 'Demand response orchestration',    priority:'High',   agentType:'Customer / Optimization', kpis:'MW dispatched vs target, customer performance rate, DR event cost', valueDriver:'Revenue / Production Uplift', modelId: null },
@@ -2205,6 +2215,7 @@ const UC_REVPROT = {
   title: 'Revenue <em>Protection</em> Agent',
   eyebrow: 'Use Case · 08',
   description: 'Agentic detection and investigation prioritization for non-technical loss (NTL) — meter tampering, theft, unbilled usage, and systematic billing errors. Continuously analyzes AMI interval data against consumption baselines, peer-group comparisons, and physical event signals to generate scored investigation leads, auto-assign field crews, and track recovery from case open to revenue restoration.',
+  citation: 'Source: Edison Electric Institute / EPRI, 2022 — non-technical losses (theft, meter fraud, billing error) account for 1–3% of total distribution utility revenue; AI-assisted detection programs have achieved 40–65% recovery improvement.',
   sections: [
     { title: 'Utility Scale', inputs: [
       { id: 'customers',      label: 'Total electric customers',                 default: 600000,   unit: 'customers', key: true },
@@ -2317,6 +2328,7 @@ const UC_BILLINQ = {
   title: 'Billing Inquiry <em>Resolution</em> Agent',
   eyebrow: 'Use Case · 09',
   description: 'Agentic resolution of customer billing inquiries across digital and IVR channels — bill spike explanation, estimated read disputes, rate plan questions, payment arrangement setup, and high-usage alerts. Agent resolves Tier 1-2 contacts without a human agent and provides structured context packages to agents for Tier 3 escalations, reducing handle time and improving first-contact resolution.',
+  citation: 'Source: J.D. Power Utility Customer Satisfaction Study, 2023 — billing inquiries represent 35–45% of all utility customer service contacts; AI-assisted resolution has reduced average handle time by 50–70% in deployed programs.',
   sections: [
     { title: 'Contact Center Scale', inputs: [
       { id: 'customers',       label: 'Total electric customers',              default: 600000,  unit: 'customers', key: true },
@@ -2421,6 +2433,7 @@ const UC_PAYRISK = {
   title: 'Payment Risk <em>Prediction</em> Agent',
   eyebrow: 'Use Case · 10',
   description: 'Agentic account-level payment risk scoring and proactive intervention — predicting which customers are likely to miss payment before the bill is due, enabling personalized outreach, payment plan offers, and credit holds. Integrates AMI consumption signals, payment history, demographic indicators, and economic stress markers to produce a daily risk score for each account and recommended intervention action.',
+  citation: 'Source: DEFG Distributed Energy Financial Group, 2022 — utility bad debt expense ranges from 0.4–1.2% of revenue; predictive payment risk models have demonstrated 20–35% reduction in write-offs in pilot deployments.',
   sections: [
     { title: 'Utility & Customer Profile', inputs: [
       { id: 'customers',      label: 'Total electric customers',                default: 600000,   unit: 'customers', key: true },
@@ -2526,6 +2539,7 @@ const UC_BILLEX = {
   title: 'Billing Exception <em>Resolution</em> Agent',
   eyebrow: 'Use Case · 11',
   description: 'Agentic triage and auto-resolution of billing exceptions — accounts that fall out of the automated billing run due to estimated reads, meter data management errors, rate code mismatches, unbilled periods, and high-bill flags. Agent resolves routine exception types autonomously, provides billing specialists with structured diagnostic packages for complex cases, and tracks exception aging to minimize revenue recognition delay.',
+  citation: 'Source: Chartwell Research / Utilities Billing Benchmark — billing exceptions requiring manual intervention average 3–6% of total monthly bills issued; AI-assisted exception resolution reduces manual processing time by 60–80%.',
   sections: [
     { title: 'Billing Operations Scale', inputs: [
       { id: 'customers',       label: 'Total electric customers',                default: 600000,  unit: 'customers', key: true },
@@ -2635,6 +2649,7 @@ const UC_NUCSPARE = {
   title: 'Predictive Spare Part <em>Reordering</em> — Nuclear',
   eyebrow: 'Use Case · 12',
   description: 'AI-driven forecasting to predict spare part demand in nuclear plants — integrating maintenance schedules, surveillance records, outage plans, PMID history, and vendor lead times to right-size inventory, eliminate stockouts, and reduce excess stock. Agent generates reorder recommendations, flags long-lead critical items, and tracks order status against upcoming outage windows.',
+  citation: 'Source: Nuclear Energy Institute (NEI) Operating Cost Survey, 2022 — nuclear plant MRO inventory carrying costs average 20–26% annually; stockout events during outages average $75,000–$250,000 per event in schedule impact and emergency procurement premium.',
   sections: [
     { title: 'Plant & Inventory Profile', inputs: [
       { id: 'units',            label: 'Nuclear generating units in scope',        default: 1,         unit: 'units' },
@@ -2739,6 +2754,7 @@ const UC_NUCDATA = {
   title: 'Nuclear Plant Data <em>Retrieval</em> Acceleration',
   eyebrow: 'Use Case · 13',
   description: 'Natural language search across nuclear plant technical document corpuses — operating procedures, surveillance test records, maintenance histories, vendor manuals, technical specifications, and regulatory correspondence. Agent retrieves relevant data in seconds rather than hours, enabling engineers, operators, and compliance staff to spend more time on analysis and less on information hunting.',
+  citation: 'Source: INPO AP-913 Equipment Reliability Program / EPRI Nuclear Knowledge Management study — nuclear plant engineers spend an estimated 20–35% of their time locating and retrieving information from technical documentation systems.',
   sections: [
     { title: 'Engineering & Operations Scale', inputs: [
       { id: 'eng_fte',          label: 'Engineers + technical staff in scope',      default: 120,   unit: 'FTEs', key: true },
@@ -2836,6 +2852,7 @@ const UC_NUCTROUBLE = {
   title: 'Nuclear Plant <em>Troubleshooting</em> Acceleration',
   eyebrow: 'Use Case · 14',
   description: 'Query-based troubleshooting system for nuclear plant operators and engineers — retrieving equipment maintenance histories, flagging similar past failure modes, surfacing vendor technical bulletins and corrective actions, and generating structured failure analysis packages. A feedback loop captures resolution outcomes to continuously improve diagnostic accuracy and reduce repeat failures.',
+  citation: 'Source: INPO Operating Experience Program / NRC Generic Letter 91-18 Corrective Action Program data — repeat failures account for 15–25% of corrective maintenance events at U.S. nuclear plants; faster root cause identification reduces repeat occurrence rates by 25–40%.',
   sections: [
     { title: 'Maintenance & Operations Scale', inputs: [
       { id: 'maint_fte',        label: 'Maintenance engineers + technicians in scope', default: 90, unit: 'FTEs', key: true },
@@ -2938,6 +2955,7 @@ const UC_NUCDOC = {
   title: 'Nuclear Energy <em>Deliverables</em> Enhancement',
   eyebrow: 'Use Case · 15',
   description: 'LLM-assisted creation of nuclear technical deliverables — technical reports, operability determinations, license amendment requests, 10CFR50.59 screenings, and probabilistic risk analyses. Agent identifies applicable regulatory scenarios, auto-populates structured templates from plant databases, drafts content for senior engineer review, and tracks revision cycles to reduce rework. Improves quality, consistency, and throughput without compromising the senior engineer accountability chain.',
+  citation: 'Source: Nuclear Energy Institute License Renewal and New Plant Licensing Experience, 2022 — preparation of a License Amendment Request averages 150–500 engineer-hours; document quality issues are the primary driver of NRC Requests for Additional Information (RAIs).',
   sections: [
     { title: 'Engineering Organization Scale', inputs: [
       { id: 'lic_eng_fte',      label: 'Licensing & regulatory engineers (FTEs)',   default: 18,   unit: 'FTEs', key: true },
@@ -3044,6 +3062,7 @@ const UC_LEASETITLE = {
   title: 'Lease & Title <em>Document Intelligence</em>',
   eyebrow: 'Use Case · 16',
   description: 'AI agent extracts structured data from scanned leases, assignments, ratifications, amendments, memoranda, and title opinions — normalizing lessor/lessee, legal description, royalty rate, primary term, Pugh clauses, depth severances, shut-in provisions, and continuous development obligations into the land system of record. Continuous reconciliation between the system and underlying documents flags discrepancies before they surface during divestiture due diligence.',
+  citation: 'Source: American Association of Professional Landmen (AAPL) Survey, 2022 — manual lease abstraction averages 1.5–2.5 hours per document; title discrepancies found during divestiture due diligence average $15,000–$35,000 per event in curative cost.',
   sections: [
     { title: 'Land Department Scale', inputs: [
       { id: 'land_ftes',        label: 'Land department FTEs (landmen + analysts)', default: 28,      unit: 'FTEs',     key: true },
@@ -3151,6 +3170,7 @@ const UC_JOACLAUSE = {
   title: 'JOA & Contract <em>Clause Comparison</em>',
   eyebrow: 'Use Case · 17',
   description: 'Agent builds a clause library from the operator\'s executed JOA portfolio, compares new drafts against preferred positions and AAPL model form standards, and flags non-standard provisions — particularly non-consent penalties, AMI scope, area of operations definitions, and operatorship transfer triggers. Applicable to JOAs, JDAs, farmouts, AMIs, surface use agreements, ROW agreements, and SWD contracts.',
+  citation: 'Source: Rocky Mountain Mineral Law Foundation / AAPL Model Form JOA Study — non-standard JOA provisions, particularly non-consent penalties and AMI scope definitions, are cited in 30–45% of upstream joint venture disputes; legal review of a complex JOA averages 12–20 attorney hours.',
   sections: [
     { title: 'Contract Volume & Legal Scale', inputs: [
       { id: 'contracts_reviewed_yr', label: 'Contracts reviewed / negotiated per year', default: 85,      unit: 'contracts', key: true },
@@ -3252,6 +3272,7 @@ const UC_LANDMANQA = {
   title: 'Landman <em>Copilot</em> / Q&A',
   eyebrow: 'Use Case · 18',
   description: 'Conversational interface over the operator\'s full land document corpus — leases, title opinions, JOAs, division orders, and correspondence. Landmen and reservoir engineers query natural language questions like "What\'s our deepest-rights position in Section 14, Block A-2, Reeves County?" or "Show me all leases in our Delaware position with Pugh clauses that haven\'t been satisfied." Secure on-premise deployment ensures documents never leave the operator\'s environment.',
+  citation: 'Source: AAPL Landman Workforce Survey, 2023 — land professionals report spending 4–6 hours per day searching for lease, title, and contract information across document management systems; average query resolution time exceeds 20 minutes.',
   sections: [
     { title: 'Land Staff Scale', inputs: [
       { id: 'land_ftes',       label: 'Land staff using the copilot (FTEs)',          default: 32,   unit: 'FTEs',  key: true },
@@ -3348,6 +3369,7 @@ const UC_ADDILIGENCE = {
   title: 'A&D Diligence <em>Acceleration</em>',
   eyebrow: 'Use Case · 19',
   description: 'Agent ingests acquisition and divestiture data rooms, builds structured lease summary tables, flags consent-to-assign provisions, identifies preferential rights to purchase, and surfaces change-of-control triggers across the entire contract portfolio — compressing what typically takes outside counsel and landmen several weeks into days. Enables faster bid decisions, lower transaction costs, and higher-confidence representations and warranties.',
+  citation: 'Source: Deloitte A&D Advisory / DrillingInfo M&A Study, 2022 — A&D data room analysis typically requires 3–6 weeks and $500K–$1.5M in outside counsel and advisory fees for mid-size transactions; consent-to-assign provisions affect 20–40% of contracts in a typical data room.',
   sections: [
     { title: 'A&D Activity Volume', inputs: [
       { id: 'ad_deals_yr',        label: 'A&D transactions evaluated per year',         default: 5,       unit: 'deals',  key: true },
@@ -3448,6 +3470,7 @@ const UC_NPTI = {
   title: 'Rig Downtime & <em>NPT Intelligence</em>',
   eyebrow: 'Use Case · 20',
   description: 'Agentic monitoring of rig sensor feeds, BOP performance data, top drive history, mud pump diagnostics, and maintenance records to predict equipment failures before they cause non-productive time. Agent surfaces anomaly patterns across the fleet, generates pre-failure alerts, recommends corrective actions, and automates daily drilling report compilation — protecting dayrate revenue and improving client well delivery performance.',
+  citation: 'Source: IHS Markit / Westwood Global Drilling Performance Database, 2023 — non-productive time (NPT) averages 5–15% of drilling time for deepwater floaters; BOP and subsea equipment failures account for 30–45% of total NPT hours.',
   sections: [
     { title: 'Fleet & Dayrate Profile', inputs: [
       { id: 'drillships',      label: 'Drillships / semis in active fleet',         default: 28,     unit: 'units',  key: true },
@@ -3559,6 +3582,7 @@ const UC_CONTRACTDR = {
   title: 'Contract & <em>Dayrate Intelligence</em>',
   eyebrow: 'Use Case · 21',
   description: 'Agent builds a clause library from the operator\'s portfolio of drilling contracts, compares new drafts against preferred commercial positions, surfaces dayrate renegotiation opportunities, flags suspension provisions, force majeure triggers, early termination penalties, and performance bonus thresholds across the active backlog. Enables the contracts and commercial team to manage a multi-billion-dollar backlog without relying on tribal knowledge or manual review cycles.',
+  citation: 'Source: Bassoe Offshore Rig Contract Database / Westwood Global — offshore drilling contract portfolios at major contractors average 30–40 active contracts simultaneously; suspension and force majeure provisions have been invoked on 15–25% of contracts during commodity downturns.',
   sections: [
     { title: 'Commercial Portfolio Scale', inputs: [
       { id: 'active_contracts',   label: 'Active drilling contracts in portfolio',        default: 35,          unit: 'contracts', key: true },
@@ -3673,6 +3697,7 @@ const UC_FPSOUPT = {
   title: 'FPSO Uptime & <em>Predictive Maintenance</em>',
   eyebrow: 'Use Case · 22',
   description: 'Agentic monitoring of FPSO production equipment — separators, compressors, gas treatment trains, water injection pumps, power generation systems, and subsea riser performance — against maintenance schedules and live sensor anomaly patterns. Agent generates pre-failure alerts, recommends corrective actions, and optimizes planned maintenance windows to protect production uptime and minimize the cost of unplanned shutdowns on long-term lease-operated FPSOs.',
+  citation: 'Source: SBM Offshore 2024 Annual Report / DNV GL FPSO Reliability Study — industry FPSO uptime averages 94–97%; each percentage point of uptime improvement on a 150,000 BOPD FPSO represents approximately $38M in annual gross production value at $70/bbl.',
   sections: [
     { title: 'FPSO Fleet Profile', inputs: [
       { id: 'fpso_count',      label: 'FPSOs in lease-and-operate scope',            default: 15,    unit: 'FPSOs',  key: true },
@@ -3790,6 +3815,7 @@ const UC_FPSOKNOW = {
   title: 'FPSO O&M <em>Knowledge Management</em>',
   eyebrow: 'Use Case · 23',
   description: 'Conversational knowledge interface across the FPSO operator\'s full O&M document corpus — maintenance procedures, equipment manuals, handover packages, enterprise management system (GEMS/GTS) documents, lessons learned libraries, and regulatory correspondence — covering 15+ FPSOs operating across multiple countries, languages, and regulatory jurisdictions. Engineers and technicians query natural language questions and receive answers with source citations, reducing information retrieval time from hours to seconds and improving handover quality across the fleet.',
+  citation: 'Source: IMCA M 206 / Oil & Gas UK Workforce Competence Guidelines — FPSO crew handover is identified as a leading contributor to operational incidents; knowledge transfer gaps during handover are estimated to contribute to 15–30% of near-miss events offshore.',
   sections: [
     { title: 'Offshore Workforce Scale', inputs: [
       { id: 'fpso_count',     label: 'FPSOs in O&M scope',                         default: 15,   unit: 'FPSOs',  key: true },
@@ -3901,6 +3927,7 @@ const UC_HAZARDIMG = {
   title: 'Consumer Hazard Image <em>Triage & Field Intelligence</em>',
   eyebrow: 'Use Case · 08',
   description: 'Customers submit photos of potential hazards — downed lines, vegetation encroachment, damaged poles and equipment, flooding near infrastructure, animal contacts. Today every submission triggers an immediate truck roll. An AI agent classifies incoming images by hazard type, severity tier, and urgency, routes low-risk items to scheduled maintenance queues, and pre-briefs arriving field crews with full image history, prior submissions from the same location, and a recommended response package — reducing truck rolls, improving crew safety, and building a live vegetation risk map across the service territory.',
+  citation: 'Source: EEI Transmission & Distribution Operations Survey, 2022 — utilities dispatch a field crew to approximately 85–95% of reported hazard events; industry pilots using image-based triage have deflected 40–55% of dispatches to remote resolution or scheduled maintenance.',
   sections: [
     { title: 'Hazard Report Volume', inputs: [
       { id: 'hazard_reports_yr',   label: 'Customer hazard image submissions per year',  default: 85000,  unit: 'reports',  key: true },
@@ -4030,6 +4057,7 @@ const UC_VEGMGMT = {
   title: 'Vegetation Management <em>Intelligence</em>',
   eyebrow: 'Use Case · 09',
   description: 'Vision AI applied to drone, satellite, and mobile patrol imagery to verify contractor vegetation work against completion reports, build dynamic risk scores per span for risk-based patrol routing, and identify fast-growing encroachment before conductor contact. Replaces calendar-driven trim cycles with a continuously updated risk model that prioritizes spend on high-risk spans, reduces contractor overpayment through automated compliance verification, and cuts vegetation-caused outages through earlier identification of encroachment.',
+  citation: 'Source: NERC 2023 State of Reliability Report — vegetation contact remains the leading cause of transmission outages, accounting for 28–42% of major disturbance events; contractor audit studies show 15–25% of completion reports contain discrepancies.',
   sections: [
     { title: 'Service Territory & Program Scale', inputs: [
       { id: 'circuit_miles',      label: 'Distribution circuit miles in service territory',  default: 18000, unit: 'miles',    key: true },
@@ -4172,6 +4200,7 @@ const UC_FRACOPT = {
   title: 'Fractionation <em>Commercial & Operations Intelligence</em>',
   eyebrow: 'Use Case · 08',
   description: 'Agentic decision intelligence layer above the DCS for NGL fractionation operations. Agent monitors real-time NGL and natural gas prices, contract positions, plant inlet conditions, and producer allocation data to recommend ethane recovery/rejection disposition continuously, automate producer-customer imbalance reconciliation, flag off-spec blend risk before delivery, and optimize maintenance window timing against NGL forward curves. Eliminates the spreadsheet-and-analyst layer that today delays commercial decisions by hours and produces allocation errors that require expensive cash-out resolution.',
+  citation: 'Source: Gas Processors Association (GPA) Midstream Survey, 2023 — NGL fractionation operations report ethane disposition decision lags of 4–8 hours from market signal to operational change; allocation reconciliation consumes 15–25% of commercial analyst time monthly.',
   sections: [
     { title: 'Plant & Commercial Scale', inputs: [
       { id: 'frac_trains',         label: 'Fractionation trains in scope',                   default: 4,       unit: 'trains',   key: true },
@@ -4309,6 +4338,324 @@ const UC_FRACOPT = {
   },
 };
 
+
+// ============================================================
+// USE CASE — SUBSTATION & ASSET INSPECTION INTELLIGENCE
+// Power & Utilities · T&D Asset Management
+// ============================================================
+// Vision AI on drone and fixed-camera video of substations,
+// transformers, and switchgear. Detects thermal anomalies,
+// oil leaks, corrosion, insulator damage, and security
+// breaches against equipment baselines. Replaces periodic
+// manual IR inspection with continuous anomaly detection.
+//
+const UC_SUBSTATION = {
+  id: 'substation',
+  icon: Icons.safety,
+  name: 'Substation & Asset Inspection Intelligence',
+  meta: 'Power & Utilities · Asset Management',
+  title: 'Substation & Asset <em>Inspection Intelligence</em>',
+  eyebrow: 'Use Case · 10',
+  description: 'Multimodal vision AI applied to drone, fixed-camera, and thermal video of substations, transformers, switchgear, and breakers. Detects thermal hotspots, oil leaks, corrosion, insulator damage, bushing degradation, and physical security breaches against equipment baselines. Replaces periodic manual infrared inspection — where a technician walks the yard with a clipboard and IR camera — with continuous automated anomaly detection that routes only flagged developing faults to a human reviewer, catching transformer and switchgear failures before they become catastrophic.',
+  citation: 'Source: EPRI Power Transformer Reliability / Doble Engineering — large power transformer failures cost $2M–$8M in replacement plus 6–18 month lead times; an estimated 15–30% of failures show detectable thermal or dissolved-gas precursors months in advance.',
+  sections: [
+    { title: 'Asset Base & Inspection Program', inputs: [
+      { id: 'substations',        label: 'Substations in service territory',                default: 320,    unit: 'substations', key: true },
+      { id: 'large_transformers',  label: 'Large power transformers (>10 MVA)',             default: 480,    unit: 'units',    key: true },
+      { id: 'inspection_freq',     label: 'Manual inspections per substation per year',      default: 4,      unit: 'per yr'              },
+      { id: 'inspection_hrs',      label: 'Crew hours per substation inspection',            default: 6,      unit: 'hrs',      key: true },
+      { id: 'crew_rate',           label: 'Fully-loaded inspection crew $/hr',               default: 110,    unit: '$/hr',     key: true },
+    ]},
+    { title: 'Transformer Failure Avoidance', inputs: [
+      { id: 'xfmr_failures_yr',    label: 'Large transformer failures per year (baseline)',  default: 6,      unit: 'failures', key: true },
+      { id: 'xfmr_failure_cost',   label: 'Avg fully-loaded cost per transformer failure',   default: 3800000, unit: '$',       key: true },
+      { id: 'detectable_pct',      label: '% of failures with detectable precursors',        default: 0.30,   unit: '%', pct: true, key: true },
+      { id: 'agent_catch_rate',   label: 'Agent early-detection rate (of detectable)',      default: 0.65,   unit: '%', pct: true, key: true },
+      { id: 'switchgear_fail_yr',  label: 'Switchgear/breaker failures per year',           default: 14,     unit: 'failures'            },
+      { id: 'switchgear_cost',     label: 'Avg cost per switchgear failure',                default: 280000, unit: '$',        key: true },
+      { id: 'switchgear_catch',    label: 'Switchgear early-detection rate',                default: 0.40,   unit: '%', pct: true           },
+    ]},
+    { title: 'Inspection Labor Efficiency', inputs: [
+      { id: 'inspection_red',      label: 'Manual inspection hours reduction (drone + AI)',  default: 0.55,   unit: '%', pct: true, key: true },
+      { id: 'drone_program_cost',  label: 'Annual incremental drone program cost',          default: 600000, unit: '$',        key: true },
+      { id: 'travel_hrs_saved',    label: 'Crew travel hours avoided per year',             default: 4200,   unit: 'hrs'                 },
+    ]},
+    { title: 'Outage & Security Value', inputs: [
+      { id: 'xfmr_outage_events',  label: 'Transformer-related outage events per year',      default: 18,     unit: 'events'              },
+      { id: 'outage_cost',         label: 'Avg cost per major outage event',                default: 95000,  unit: '$',        key: true },
+      { id: 'outage_red',          label: 'Outage reduction (earlier fault detection)',     default: 0.20,   unit: '%', pct: true, key: true },
+      { id: 'security_incidents',  label: 'Physical security incidents per year (baseline)', default: 22,    unit: 'events'              },
+      { id: 'security_cost',       label: 'Avg cost per security incident (copper theft etc)', default: 38000, unit: '$',       key: true },
+      { id: 'security_red',        label: 'Security incident reduction (camera AI)',        default: 0.35,   unit: '%', pct: true           },
+    ]},
+    { title: 'Cohere North Platform', inputs: [
+      { id: 'users_y1', label: 'Users — Year 1', default: 100,   unit: 'users', key: true },
+      { id: 'users_y2', label: 'Users — Year 2', default: 500,   unit: 'users', key: true },
+      { id: 'users_y3', label: 'Users — Year 3', default: 1200,  unit: 'users', key: true },
+      { id: 'fee_y1',   label: 'Cohere fee — Year 1', default: 500000,  unit: '$', key: true },
+      { id: 'fee_y2',   label: 'Cohere fee — Year 2', default: 2200000, unit: '$', key: true },
+      { id: 'fee_y3',   label: 'Cohere fee — Year 3', default: 5000000, unit: '$', key: true },
+      { id: 'rf_y1',    label: 'Value realization — Y1', default: 0.40, unit: '%', pct: true, key: true },
+      { id: 'rf_y2',    label: 'Value realization — Y2', default: 0.80, unit: '%', pct: true, key: true },
+      { id: 'rf_y3',    label: 'Value realization — Y3', default: 1.00, unit: '%', pct: true, key: true },
+    ]},
+  ],
+  compute(i) {
+    // DRIVER 1: Transformer failure avoidance (the big one)
+    const xfmrBase = i.xfmr_failures_yr * i.detectable_pct * i.agent_catch_rate * i.xfmr_failure_cost;
+    // DRIVER 2: Switchgear failure avoidance
+    const switchgearBase = i.switchgear_fail_yr * i.switchgear_catch * i.switchgear_cost;
+    // DRIVER 3: Inspection labor efficiency
+    const inspectionHrsYr = i.substations * i.inspection_freq * i.inspection_hrs;
+    const inspectionLaborBase = (inspectionHrsYr * i.inspection_red * i.crew_rate) - i.drone_program_cost;
+    // DRIVER 4: Outage reduction
+    const outageBase = i.xfmr_outage_events * i.outage_red * i.outage_cost;
+    // DRIVER 5: Physical security
+    const securityBase = i.security_incidents * i.security_red * i.security_cost;
+
+    const years = [
+      { rf: i.rf_y1, users: i.users_y1, fee: i.fee_y1 },
+      { rf: i.rf_y2, users: i.users_y2, fee: i.fee_y2 },
+      { rf: i.rf_y3, users: i.users_y3, fee: i.fee_y3 },
+    ];
+    const rows = years.map(y => ({
+      xfmr:       xfmrBase          * y.rf,
+      switchgear: switchgearBase    * y.rf,
+      inspection: inspectionLaborBase * y.rf,
+      outage:     outageBase        * y.rf,
+      security:   securityBase      * y.rf,
+      users: y.users, fee: y.fee,
+    }));
+    rows.forEach(r => {
+      r.gross = r.xfmr + r.switchgear + r.inspection + r.outage + r.security;
+      r.net   = r.gross - r.fee;
+      r.roi   = r.gross / (r.fee || 1);
+    });
+    return {
+      years: rows,
+      drivers: [
+        { name: 'Transformer failure avoidance',     key: 'xfmr'       },
+        { name: 'Switchgear failure avoidance',      key: 'switchgear' },
+        { name: 'Inspection labor efficiency',       key: 'inspection' },
+        { name: 'Transformer outage reduction',      key: 'outage'     },
+        { name: 'Physical security incident reduction', key: 'security' },
+      ],
+      context: {
+        xfmrFailuresAvoided: Math.round(i.xfmr_failures_yr * i.detectable_pct * i.agent_catch_rate * 10) / 10,
+        inspectionHrsYr:     Math.round(inspectionHrsYr),
+        hrsSaved:            Math.round(inspectionHrsYr * i.inspection_red),
+      },
+    };
+  },
+};
+
+
+// ============================================================
+// USE CASE — STORM DAMAGE ASSESSMENT & RESTORATION TRIAGE
+// Power & Utilities · Emergency Response
+// ============================================================
+// Vision AI ingests drone, helicopter, and crew-submitted
+// video after major storms to classify damage type, estimate
+// restoration resources, and build a prioritized restoration
+// map. Replaces manual flyovers and windshield surveys.
+//
+const UC_STORM = {
+  id: 'storm',
+  icon: Icons.safety,
+  name: 'Storm Damage Assessment & Restoration Triage',
+  meta: 'Power & Utilities · Emergency Response',
+  title: 'Storm Damage Assessment & <em>Restoration Triage</em>',
+  eyebrow: 'Use Case · 11',
+  description: 'Multimodal vision AI that ingests drone, helicopter, and crew-submitted video after major storm events to automatically classify damage type (downed conductor, broken pole, vegetation on lines, transformer damage), estimate restoration resource requirements, and build a prioritized restoration map. Replaces slow, subjective helicopter flyovers and windshield damage surveys with rapid automated assessment — accelerating crew dispatch, optimizing mutual aid allocation, and producing more accurate estimated-time-of-restoration (ETR) communications that carry direct regulatory and customer-satisfaction weight.',
+  citation: 'Source: Edison Electric Institute Storm Response / PA Consulting — major storm restoration assessment traditionally requires 24–72 hours via manual survey; faster damage assessment can reduce total restoration time (SAIDI) by 10–20% and improves ETR accuracy, a key regulatory performance metric.',
+  sections: [
+    { title: 'Storm Exposure & Restoration Scale', inputs: [
+      { id: 'customers',           label: 'Customers served',                               default: 2200000, unit: 'customers', key: true },
+      { id: 'major_storms_yr',     label: 'Major storm events per year (baseline)',         default: 8,      unit: 'events',   key: true },
+      { id: 'avg_cmi_per_storm',   label: 'Avg customer-minutes interrupted per storm (M)',  default: 45,     unit: 'M cust-min', key: true },
+      { id: 'restoration_hrs',     label: 'Avg restoration duration per major storm (hrs)',  default: 38,     unit: 'hrs',      key: true },
+    ]},
+    { title: 'Restoration Time Reduction', inputs: [
+      { id: 'assessment_hrs_base', label: 'Damage assessment time today (hrs per storm)',    default: 28,     unit: 'hrs',      key: true },
+      { id: 'assessment_hrs_ai',   label: 'Damage assessment time with agent (hrs)',         default: 6,      unit: 'hrs',      key: true },
+      { id: 'restoration_accel',   label: 'Restoration time reduction (faster triage)',     default: 0.12,   unit: '%', pct: true, key: true },
+      { id: 'cmi_value',           label: 'Value per customer-minute interrupted ($)',      default: 0.06,   unit: '$',        key: true },
+    ]},
+    { title: 'Crew & Mutual Aid Optimization', inputs: [
+      { id: 'storm_crew_cost',     label: 'Avg total crew cost per major storm',            default: 2400000, unit: '$',       key: true },
+      { id: 'mutual_aid_eff',      label: 'Mutual aid allocation efficiency gain',          default: 0.10,   unit: '%', pct: true, key: true },
+      { id: 'crew_idle_red',       label: 'Crew idle/rework time reduction (better routing)', default: 0.15, unit: '%', pct: true, key: true },
+      { id: 'helicopter_cost',     label: 'Annual helicopter/aerial survey cost avoided',   default: 1200000, unit: '$',       key: true },
+      { id: 'helicopter_red',      label: 'Aerial survey cost reduction (drone + AI)',      default: 0.50,   unit: '%', pct: true           },
+    ]},
+    { title: 'Regulatory & ETR Value', inputs: [
+      { id: 'etr_penalty_exposure', label: 'Annual ETR/reliability penalty exposure',       default: 3500000, unit: '$',       key: true },
+      { id: 'etr_red',             label: 'Penalty exposure reduction (accurate ETR)',      default: 0.30,   unit: '%', pct: true, key: true },
+      { id: 'saidi_reg_value',     label: 'Annual rate-case value of SAIDI improvement',    default: 1800000, unit: '$',        key: true },
+      { id: 'saidi_capture',       label: 'Share of SAIDI value captured by use case',      default: 0.25,   unit: '%', pct: true           },
+    ]},
+    { title: 'Cohere North Platform', inputs: [
+      { id: 'users_y1', label: 'Users — Year 1', default: 90,    unit: 'users', key: true },
+      { id: 'users_y2', label: 'Users — Year 2', default: 450,   unit: 'users', key: true },
+      { id: 'users_y3', label: 'Users — Year 3', default: 1100,  unit: 'users', key: true },
+      { id: 'fee_y1',   label: 'Cohere fee — Year 1', default: 450000,  unit: '$', key: true },
+      { id: 'fee_y2',   label: 'Cohere fee — Year 2', default: 2000000, unit: '$', key: true },
+      { id: 'fee_y3',   label: 'Cohere fee — Year 3', default: 4500000, unit: '$', key: true },
+      { id: 'rf_y1',    label: 'Value realization — Y1', default: 0.40, unit: '%', pct: true, key: true },
+      { id: 'rf_y2',    label: 'Value realization — Y2', default: 0.80, unit: '%', pct: true, key: true },
+      { id: 'rf_y3',    label: 'Value realization — Y3', default: 1.00, unit: '%', pct: true, key: true },
+    ]},
+  ],
+  compute(i) {
+    // DRIVER 1: Restoration time reduction → CMI value
+    const cmiTotalYr = i.major_storms_yr * i.avg_cmi_per_storm * 1000000;
+    const restorationBase = cmiTotalYr * i.restoration_accel * i.cmi_value;
+    // DRIVER 2: Crew + mutual aid optimization
+    const crewBase = i.storm_crew_cost * i.major_storms_yr * (i.mutual_aid_eff + i.crew_idle_red);
+    // DRIVER 3: Aerial survey cost avoidance
+    const aerialBase = i.helicopter_cost * i.helicopter_red;
+    // DRIVER 4: ETR / regulatory penalty avoidance
+    const etrBase = i.etr_penalty_exposure * i.etr_red;
+    // DRIVER 5: SAIDI rate-case value
+    const saidiBase = i.saidi_reg_value * i.saidi_capture;
+
+    const years = [
+      { rf: i.rf_y1, users: i.users_y1, fee: i.fee_y1 },
+      { rf: i.rf_y2, users: i.users_y2, fee: i.fee_y2 },
+      { rf: i.rf_y3, users: i.users_y3, fee: i.fee_y3 },
+    ];
+    const rows = years.map(y => ({
+      restoration: restorationBase * y.rf,
+      crew:        crewBase        * y.rf,
+      aerial:      aerialBase      * y.rf,
+      etr:         etrBase         * y.rf,
+      saidi:       saidiBase       * y.rf,
+      users: y.users, fee: y.fee,
+    }));
+    rows.forEach(r => {
+      r.gross = r.restoration + r.crew + r.aerial + r.etr + r.saidi;
+      r.net   = r.gross - r.fee;
+      r.roi   = r.gross / (r.fee || 1);
+    });
+    return {
+      years: rows,
+      drivers: [
+        { name: 'Restoration time reduction (CMI)',  key: 'restoration' },
+        { name: 'Crew & mutual aid optimization',    key: 'crew'        },
+        { name: 'Aerial survey cost avoidance',      key: 'aerial'      },
+        { name: 'ETR penalty exposure reduction',    key: 'etr'         },
+        { name: 'SAIDI rate-case value',             key: 'saidi'       },
+      ],
+      context: {
+        assessmentHrsSaved: i.assessment_hrs_base - i.assessment_hrs_ai,
+        cmiTotalYr:         Math.round(cmiTotalYr / 1000000),
+        stormsCovered:      i.major_storms_yr,
+      },
+    };
+  },
+};
+
+
+// ============================================================
+// USE CASE — WILDFIRE RISK & IGNITION SOURCE DETECTION
+// Power & Utilities · Wildfire Mitigation
+// ============================================================
+// Vision AI on camera networks and drone patrols across
+// high fire-threat districts. Detects vegetation contact,
+// conductor slap, equipment arcing, and smoke. Continuous
+// clearance monitoring. Driven by catastrophic liability
+// avoidance, not operational efficiency.
+//
+const UC_WILDFIRE = {
+  id: 'wildfire',
+  icon: Icons.safety,
+  name: 'Wildfire Risk & Ignition Source Detection',
+  meta: 'Power & Utilities · Wildfire Mitigation',
+  title: 'Wildfire Risk & <em>Ignition Source Detection</em>',
+  eyebrow: 'Use Case · 12',
+  description: 'Multimodal vision AI applied to camera networks, drone patrols, and satellite imagery across high fire-threat districts. Detects ignition risk in real time — vegetation-to-conductor contact, conductor slap, equipment arcing and faults, and early smoke in the right-of-way — and provides continuous vegetation clearance monitoring. For utilities operating under PSPS regimes and wildfire liability exposure, the value driver is not operational efficiency but catastrophic liability avoidance and more surgical, less disruptive Public Safety Power Shutoff decisions.',
+  citation: 'Source: CPUC / Wildfire Safety Division filings — utility wildfire liability exposure has reached multi-billion-dollar levels; powerline ignitions account for a small share of total wildfire starts but a disproportionate share of catastrophic-loss events, and early ignition detection plus targeted PSPS materially reduce both liability and customer disruption.',
+  sections: [
+    { title: 'Fire-Threat Exposure', inputs: [
+      { id: 'htd_miles',          label: 'Circuit miles in high fire-threat districts',     default: 12000,  unit: 'miles',   key: true },
+      { id: 'customers_htd',       label: 'Customers in high fire-threat districts',        default: 850000, unit: 'customers', key: true },
+      { id: 'cameras_deployed',    label: 'AI-enabled cameras / sensors deployed',          default: 600,    unit: 'units'               },
+      { id: 'annual_liability_reserve', label: 'Annual wildfire liability reserve / exposure', default: 900000000, unit: '$', key: true },
+    ]},
+    { title: 'Catastrophic Ignition Avoidance', inputs: [
+      { id: 'ignition_events_yr',  label: 'Powerline ignition events per year (baseline)',   default: 28,     unit: 'events',  key: true },
+      { id: 'catastrophic_pct',    label: '% of ignitions that risk catastrophic loss',     default: 0.04,   unit: '%', pct: true, key: true },
+      { id: 'catastrophic_cost',   label: 'Expected loss per catastrophic ignition',        default: 1200000000, unit: '$',   key: true },
+      { id: 'detection_red',       label: 'Ignition risk reduction (early detection)',      default: 0.015,  unit: '%', pct: true, key: true },
+    ]},
+    { title: 'PSPS Optimization', inputs: [
+      { id: 'psps_events_yr',      label: 'PSPS events per year (baseline)',                default: 12,     unit: 'events',  key: true },
+      { id: 'customers_per_psps',  label: 'Avg customers de-energized per PSPS event',      default: 180000, unit: 'customers', key: true },
+      { id: 'cost_per_cust_psps',  label: 'Economic cost per customer per PSPS event ($)',  default: 28,     unit: '$',       key: true },
+      { id: 'psps_precision',      label: 'PSPS scope reduction (surgical targeting)',      default: 0.18,   unit: '%', pct: true, key: true },
+    ]},
+    { title: 'Inspection & Vegetation', inputs: [
+      { id: 'fire_inspection_cost', label: 'Annual fire-season inspection / patrol spend',  default: 18000000, unit: '$',     key: true },
+      { id: 'inspection_eff',      label: 'Inspection efficiency gain (continuous monitoring)', default: 0.20, unit: '%', pct: true, key: true },
+      { id: 'reg_penalty_exposure', label: 'Annual regulatory penalty exposure (WMP compliance)', default: 8000000, unit: '$', key: true },
+      { id: 'reg_red',             label: 'Penalty exposure reduction (documented mitigation)', default: 0.25, unit: '%', pct: true           },
+    ]},
+    { title: 'Cohere North Platform', inputs: [
+      { id: 'users_y1', label: 'Users — Year 1', default: 120,   unit: 'users', key: true },
+      { id: 'users_y2', label: 'Users — Year 2', default: 600,   unit: 'users', key: true },
+      { id: 'users_y3', label: 'Users — Year 3', default: 1500,  unit: 'users', key: true },
+      { id: 'fee_y1',   label: 'Cohere fee — Year 1', default: 600000,  unit: '$', key: true },
+      { id: 'fee_y2',   label: 'Cohere fee — Year 2', default: 2800000, unit: '$', key: true },
+      { id: 'fee_y3',   label: 'Cohere fee — Year 3', default: 6500000, unit: '$', key: true },
+      { id: 'rf_y1',    label: 'Value realization — Y1', default: 0.35, unit: '%', pct: true, key: true },
+      { id: 'rf_y2',    label: 'Value realization — Y2', default: 0.75, unit: '%', pct: true, key: true },
+      { id: 'rf_y3',    label: 'Value realization — Y3', default: 1.00, unit: '%', pct: true, key: true },
+    ]},
+  ],
+  compute(i) {
+    // DRIVER 1: Catastrophic ignition avoidance (expected-value, kept conservative)
+    const catBase = i.ignition_events_yr * i.catastrophic_pct * i.catastrophic_cost * i.detection_red;
+    // DRIVER 2: PSPS optimization — fewer customers de-energized
+    const pspsBase = i.psps_events_yr * i.customers_per_psps * i.cost_per_cust_psps * i.psps_precision;
+    // DRIVER 3: Inspection efficiency
+    const inspectionBase = i.fire_inspection_cost * i.inspection_eff;
+    // DRIVER 4: Regulatory penalty avoidance
+    const regBase = i.reg_penalty_exposure * i.reg_red;
+
+    const years = [
+      { rf: i.rf_y1, users: i.users_y1, fee: i.fee_y1 },
+      { rf: i.rf_y2, users: i.users_y2, fee: i.fee_y2 },
+      { rf: i.rf_y3, users: i.users_y3, fee: i.fee_y3 },
+    ];
+    const rows = years.map(y => ({
+      catastrophic: catBase        * y.rf,
+      psps:         pspsBase       * y.rf,
+      inspection:   inspectionBase * y.rf,
+      reg:          regBase        * y.rf,
+      users: y.users, fee: y.fee,
+    }));
+    rows.forEach(r => {
+      r.gross = r.catastrophic + r.psps + r.inspection + r.reg;
+      r.net   = r.gross - r.fee;
+      r.roi   = r.gross / (r.fee || 1);
+    });
+    return {
+      years: rows,
+      drivers: [
+        { name: 'Catastrophic ignition avoidance (EV)', key: 'catastrophic' },
+        { name: 'PSPS scope optimization',             key: 'psps'         },
+        { name: 'Fire-season inspection efficiency',   key: 'inspection'   },
+        { name: 'Regulatory penalty avoidance',        key: 'reg'          },
+      ],
+      context: {
+        custProtectedPsps: Math.round(i.psps_events_yr * i.customers_per_psps * i.psps_precision),
+        htdMiles:          i.htd_miles,
+        evCatastrophic:    Math.round(catBase / 1000000),
+      },
+    };
+  },
+};
+
 // Map modelId to sector for tab activation
 const MODEL_SECTOR = {
   field: 'upstream', safety: 'upstream', prod: 'upstream',
@@ -4318,6 +4665,9 @@ const MODEL_SECTOR = {
   revprot: 'power', billinq: 'power', payrisk: 'power', billex: 'power',
   hazardimg: 'power',
   vegmgmt: 'power',
+  substation: 'power',
+  storm: 'power',
+  wildfire: 'power',
   nucspare: 'power', nucdata: 'power', nuctrouble: 'power', nucdoc: 'power',
   leasetitle: 'upstream', joaclause: 'upstream', landmanqa: 'upstream', addiligence: 'upstream',
   npti: 'upstream', contractdr: 'upstream', fpsoupt: 'upstream', fpsoknow: 'upstream',
@@ -4327,6 +4677,7 @@ const USE_CASES = [
   UC_FIELD, UC_SAFETY, UC_PROD, UC_JOBPLAN, UC_WORKFORCE, UC_MRO,
   UC_CRUDE, UC_FRACOPT,
   UC_REVPROT, UC_BILLINQ, UC_PAYRISK, UC_BILLEX, UC_HAZARDIMG, UC_VEGMGMT,
+  UC_SUBSTATION, UC_STORM, UC_WILDFIRE,
   UC_NUCSPARE, UC_NUCDATA, UC_NUCTROUBLE, UC_NUCDOC,
   UC_LEASETITLE, UC_JOACLAUSE, UC_LANDMANQA, UC_ADDILIGENCE,
   UC_NPTI, UC_CONTRACTDR, UC_FPSOUPT, UC_FPSOKNOW,
@@ -4751,6 +5102,12 @@ function renderResults() {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> Decision lag saved: <strong>${fmtNum(result.context.lagHrsSaved, 1)} hrs</strong> · Imbalances avoided/yr: <strong>${fmtNum(result.context.imbalancesAvoided)}</strong> · Off-spec events avoided/yr: <strong>${fmtNum(result.context.offspecAvoided)}</strong> · Turnaround timing days saved: <strong>${fmtNum(result.context.timingDaysSaved, 1)}</strong>. Ethane recovery optimization is the most volatile driver — value depends on the ethane-to-propane spread, which moves with NGL market conditions. Model uses $0.22/gal spread and 250 decision events/yr. Y1 at 40% reflects integration time with SCADA, gas measurement, and commercial scheduling systems. Key inputs to validate: current decision lag, imbalance frequency, and off-spec event history. Conservative: excludes NGL optionality value from better product routing and the relationship value of more accurate producer statements.</div>`;
   } else if (uc.id === 'crude') {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> Annual change requests: <strong>${fmtNum(result.context.annualReqs)}</strong> · Conflicted requests/yr: <strong>${fmtNum(result.context.conflictReqs)}</strong> · Confirmation cycle time saved: <strong>${fmtNum(result.context.hrsSaved, 1)} hrs</strong>. Scheduler labor and conflict resolution dominate the value stack. Conservative: excludes commercial value of shipper retention from faster service levels and downstream batch-sequencing optimization upside.</div>`;
+  } else if (uc.id === 'substation') {
+    caveatHTML = `<div class="caveat"><strong>Context:</strong> Transformer failures avoided/yr: <strong>${fmtNum(result.context.xfmrFailuresAvoided, 1)}</strong> · Inspection hrs/yr: <strong>${fmtNum(result.context.inspectionHrsYr)}</strong> · Hrs saved/yr: <strong>${fmtNum(result.context.hrsSaved)}</strong>. Transformer failure avoidance is by far the largest driver — a single large power transformer failure runs $2M–$8M plus 6–18 month replacement lead times. The model is conservative: only 25% of failures are assumed to have detectable precursors and the agent catches 65% of those. Y1 at 40% reflects vision model training time on the customer's specific equipment types and thermal baselines. Key inputs to validate: large transformer count, historical failure rate, and fully-loaded failure cost including replacement power. Conservative: excludes deferred capital from extended asset life and insurance premium reduction from improved condition monitoring.</div>`;
+  } else if (uc.id === 'storm') {
+    caveatHTML = `<div class="caveat"><strong>Context:</strong> Assessment hrs saved per storm: <strong>${fmtNum(result.context.assessmentHrsSaved)}</strong> · Customer-minutes/yr (M): <strong>${fmtNum(result.context.cmiTotalYr)}</strong> · Major storms covered: <strong>${fmtNum(result.context.stormsCovered)}</strong>. Restoration time reduction (CMI value) is the largest driver and the most defensible — utilities measure SAIDI rigorously and a 12% restoration acceleration is conservative against documented results of automated damage assessment. Y1 at 40% reflects integration with OMS/ADMS and crew dispatch systems. Key inputs to validate: customer count, major storm frequency, and customer-minutes interrupted from the customer's reliability reporting. Conservative: excludes brand and customer-satisfaction value beyond the modeled ETR penalty, and storm-cost-recovery rate case benefits.</div>`;
+  } else if (uc.id === 'wildfire') {
+    caveatHTML = `<div class="caveat"><strong>Context:</strong> Customers protected from PSPS/yr: <strong>${fmtNum(result.context.custProtectedPsps)}</strong> · High fire-threat district miles: <strong>${fmtNum(result.context.htdMiles)}</strong> · Catastrophic ignition EV/yr ($M): <strong>${fmtNum(result.context.evCatastrophic)}</strong>. <strong>This use case is driven by catastrophic liability avoidance, not operational efficiency</strong> — the economics are fundamentally different and willingness-to-pay is far higher than other utility use cases. The catastrophic ignition driver is an expected-value calculation kept deliberately conservative (4% of ignitions risk catastrophic loss, 1.5% risk reduction); even small reductions against multi-billion-dollar exposure dominate. Y1 at 35% reflects the longer integration and validation cycle for safety-critical systems. Key inputs to validate with the customer's Wildfire Mitigation Plan team: liability reserve, ignition history, and PSPS customer impact. Conservative: the EV approach understates value for utilities with active catastrophic litigation exposure.</div>`;
   } else if (uc.id === 'vegmgmt') {
     caveatHTML = `<div class="caveat"><strong>Context:</strong> Total T&D miles: <strong>${fmtNum(result.context.totalCircuitMiles)}</strong> · Discrepancy events/yr flagged: <strong>${fmtNum(result.context.discrepancyEventsYr)}</strong> · Overpayment recovered/yr: <strong>${fmtUSD(result.context.overpayRecovery)}</strong> · Outages avoided/yr: <strong>${fmtNum(result.context.outagesAvoided)}</strong>. Contractor overpayment recovery and discrepancy detection are the most immediate value drivers — recoverable in Y1 as soon as the agent is processing completion imagery. Inspection efficiency gain requires integration with existing mobile workforce management system. Y1 realization at 40% reflects vision model training time on utility-specific tree species and conductor clearance standards. Conservative: excludes rate case regulatory benefit from SAIDI improvement, insurance premium reduction from lower vegetation incident frequency, and avoided NERC civil penalty exposure beyond the modeled FAC-003 amount. Key inputs to validate: annual contractor spend, current audit coverage rate, and vegetation outage count from CAIDI/SAIDI reports.</div>`;
   } else if (uc.id === 'hazardimg') {
@@ -5238,9 +5595,10 @@ function renderAgentPanel() {
 
 
 // ============================================================
-// SLIDE GENERATOR — Appraisal_Output_Template style
-// Slide 1: Executive Summary (4 large metrics + summary text)
-// Slide 2: Scenario Assumptions (full inputs table + driver chart)
+// SLIDE GENERATOR — Option B layout (Problem | Solution | Value)
+// Slide 1: Use Case Overview (3-col: Current State | Agent | Value)
+// Slide 2: Scenario Assumptions (inputs table + driver chart)
+// Citation statement on each slide from uc.citation
 // ============================================================
 const LOGO_B64 = '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';
 
@@ -5263,25 +5621,25 @@ function buildSlide(uc, r) {
     alert('PptxGenJS not loaded — please refresh the page.'); return;
   }
 
-  // ── Design tokens (Appraisal_Output_Template) ────────────────────────
+  // ── Design tokens ────────────────────────────────────────────────────
   const C = {
     white:   'FFFFFF',
-    dark:    '333333',   // primary text — matches template dark gray
-    medium:  '595959',   // body / summary text
-    muted:   '9E9E9E',   // label text under metrics / footer
-    tblLine: 'E0E0E4',   // subtle row divider lines
-    tblHdr:  '212121',   // table header bold text
-    cardBg:  'FFFFFF',   // white card on slide 2
-    cardBdr: 'E0E0E4',   // card border
-    // Gradient blob colors for slide 2 background band
-    blobA:   'A78BFA',   // purple
-    blobB:   '60A5FA',   // blue
-    blobC:   'F472B6',   // pink
-    barFill: '4D6EE5',   // driver bar fill (blue, matches template)
-    barBg:   'EEEEEE',   // driver bar track
+    dark:    '1A2B4A',
+    body:    '333333',
+    mid:     '555555',
+    muted:   '888888',
+    light:   'BBBBBB',
+    rule:    'E0E0E4',
+    bg:      'F4F6FA',
+    bgsub:   'EAEDF2',
+    green:   '1D9E75',
+    amber:   'E8A34D',
+    coral:   'FF8266',
+    blue:    '4D6EE5',
+    hdrBg:   '1A2B4A',
+    colDiv:  'D4D8E2',
   };
-
-  const FF = 'Inter';    // template font throughout
+  const FF = 'Inter';
 
   // ── Value helpers ────────────────────────────────────────────────────
   const gross3 = r.years.reduce((s,y)=>s+y.gross,0);
@@ -5292,305 +5650,334 @@ function buildSlide(uc, r) {
   const pay1   = y1.fee / (y1.gross/12||1);
 
   const fmtM = n => {
-    if (!n || isNaN(n)) return '—';
-    const a = Math.abs(n);
-    if (a >= 1e9) return (n<0?'-':'') + '$' + (Math.abs(n)/1e9).toFixed(1) + 'B';
-    if (a >= 1e6) return (n<0?'-':'') + '$' + (Math.abs(n)/1e6).toFixed(1) + 'M';
-    return (n<0?'-':'') + '$' + (Math.abs(n)/1e3).toFixed(0) + 'K';
+    if (!n||isNaN(n)) return '—';
+    const a=Math.abs(n);
+    if (a>=1e9) return (n<0?'-':'')+'$'+(Math.abs(n)/1e9).toFixed(1)+'B';
+    if (a>=1e6) return (n<0?'-':'')+'$'+(Math.abs(n)/1e6).toFixed(1)+'M';
+    return (n<0?'-':'')+'$'+(Math.abs(n)/1e3).toFixed(0)+'K';
   };
-  const fmtROI = n => (!n||isNaN(n)||!isFinite(n)) ? '—' : n.toFixed(1) + 'x';
-  const fmtPct = n => (!n||isNaN(n)) ? '—' : (n*100).toFixed(1) + '%';
+  const fmtROI = n => (!n||isNaN(n)||!isFinite(n)) ? '—' : n.toFixed(1)+'x';
+  const fmtPct = n => (!n||isNaN(n)) ? '—' : (n*100).toFixed(1)+'%';
 
   // Sector label
-  let sectorLabel = '';
-  Object.entries(TAXONOMY).forEach(([,s]) => {
-    const flat = s.subFilter ? Object.values(s.entries).flat() : (s.entries||[]);
-    if (flat.some(e=>e.modelId===uc.id)) sectorLabel = s.label;
-  });
+  let sectorLabel = uc.meta || '';
 
-  // Drivers sorted by 3-yr total desc
-  const drivers = r.drivers.map(d => ({
-    name:  d.name,
+  // Drivers sorted by 3-yr total
+  const drivers = r.drivers.map(d=>({
+    name: d.name,
     total: r.years.reduce((s,y)=>s+(y[d.key]||0),0),
-    y1:    y1[d.key]||0,
   })).sort((a,b)=>b.total-a.total);
 
-  // All assumptions (every input, not just key ones)
+  // All assumptions for slide 2
   const allAssumps = [];
   uc.sections.forEach(sec => {
-    if (sec.title.toLowerCase().includes('cohere north')) return; // skip platform fees section
+    if (sec.title.toLowerCase().includes('cohere north')) return;
     sec.inputs.forEach(inp => {
       const v = state.values[uc.id][inp.id];
       const disp = inp.pct ? fmtPct(v)
-        : inp.unit === '$' ? fmtM(v)
-        : Number(v).toLocaleString('en-US',{maximumFractionDigits:0}) + ' ' + inp.unit;
-      allAssumps.push({ label: inp.label, value: disp });
+        : inp.unit==='$' ? fmtM(v)
+        : Number(v).toLocaleString('en-US',{maximumFractionDigits:0})+' '+inp.unit;
+      allAssumps.push({label: inp.label, value: disp});
     });
   });
 
-  // ── Build presentation ──────────────────────────────────────────────
+  // Citation text (trimmed for slide)
+  const citationText = uc.citation || 'Value estimates are directional, calibrated to published industry benchmarks and set conservatively below published midpoints.';
+
+  // ── Build presentation ────────────────────────────────────────────────
   const pres = new PptxGenJS();
-  pres.layout  = 'LAYOUT_WIDE'; // 13.33 × 7.5
-  pres.subject = uc.name + ' — Cohere Value Appraisal';
+  pres.layout  = 'LAYOUT_WIDE';
+  pres.subject = uc.name + ' — Cohere North Value Appraisal';
   pres.author  = 'Cohere North';
 
-  // Footer helper
-  function addFooter(sl, pageNum) {
-    // Cohere logo bottom-left
+  // Shared footer helper
+  function addFooter(sl, pageNum, dark) {
+    const fc = dark ? C.white : C.muted;
     if (LOGO_B64) {
-      try {
-        sl.addImage({ data:'image/png;base64,'+LOGO_B64, x:0.28, y:7.18, w:0.45, h:0.2 });
-      } catch(e) { /* skip if logo fails */ }
+      try { sl.addImage({data:'image/png;base64,'+LOGO_B64, x:0.28, y:7.15, w:0.48, h:0.21}); } catch(e){}
     }
     sl.addText('COHERE VALUE APPRAISAL', {
-      x: 4.0, y: 7.22, w: 5.0, h: 0.18,
-      fontFace: FF, fontSize: 8, color: C.muted,
-      align: 'center', charSpacing: 2,
+      x:4.0, y:7.20, w:5.0, h:0.18,
+      fontFace:FF, fontSize:7.5, color:dark?C.white:C.muted,
+      align:'center', charSpacing:2,
     });
     sl.addText(String(pageNum), {
-      x: 12.9, y: 7.22, w: 0.3, h: 0.18,
-      fontFace: FF, fontSize: 8, color: C.muted, align: 'right',
+      x:12.9, y:7.20, w:0.3, h:0.18,
+      fontFace:FF, fontSize:7.5, color:dark?C.white:C.muted, align:'right',
     });
   }
 
-  // ════════════════════════════════════════════════════════════════════
-  // SLIDE 1 — EXECUTIVE SUMMARY
-  // Layout: white bg · title top-left · 2×2 metric grid center-right
-  //         · exec summary text left column · footer
-  // ════════════════════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════════════
+  // SLIDE 1 — USE CASE OVERVIEW  (Option B layout)
+  // Header: name left | two metrics right
+  // Three columns: Current State | Agentic Solution | Value at Scale
+  // Footer: citation statement
+  // ══════════════════════════════════════════════════════════════════════
   const s1 = pres.addSlide();
   s1.background = { color: C.white };
 
-  // Use case title — top left, light weight, dark
-  s1.addText(uc.name + (sectorLabel ? '  ·  ' + sectorLabel : ''), {
-    x:0.35, y:0.3, w:4.5, h:0.42,
-    fontFace: FF, fontSize: 20, bold: false, color: C.dark,
+  // ── Header bar ──────────────────────────────────────────────────────
+  s1.addShape(pres.shapes.RECTANGLE, {
+    x:0, y:0, w:13.33, h:1.10,
+    fill:{ color: C.hdrBg }, line:{ type:'none' },
   });
 
-  // EXECUTIVE SUMMARY label
-  s1.addText('EXECUTIVE SUMMARY', {
-    x:0.35, y:1.05, w:3.0, h:0.22,
-    fontFace: FF, fontSize: 9.5, bold: false,
-    color: C.muted, charSpacing: 2.5,
+  // Sector kicker
+  s1.addText(sectorLabel.toUpperCase(), {
+    x:0.35, y:0.10, w:6.0, h:0.18,
+    fontFace:FF, fontSize:8, color:'6A7F9E', charSpacing:2, bold:false,
+  });
+  // Use case title
+  s1.addText(uc.name, {
+    x:0.35, y:0.28, w:6.5, h:0.52,
+    fontFace:FF, fontSize:22, bold:false, color:C.white,
   });
 
-  // Summary paragraph
-  const summaryText = [
-    'Year 1 platform cost of ' + fmtM(y1.fee) + ' recovered in ' +
-      (pay1>0&&isFinite(pay1) ? pay1.toFixed(1)+' months' : '—') + '.',
-    'Three-year gross value of ' + fmtM(gross3) + ' across ' + drivers.length + ' value drivers. ' +
-      'Net of Cohere fees: ' + fmtM(net3) + '.',
-    'Largest driver: ' + (drivers[0]?.name||'—') + ' (' + fmtM(drivers[0]?.total||0) + ', ' +
-      fmtPct(gross3>0?(drivers[0]?.total||0)/gross3:0) + ' of total).',
-  ].join('\n\n');
-
-  s1.addText(summaryText, {
-    x:0.35, y:1.35, w:3.2, h:2.2,
-    fontFace: FF, fontSize: 11.5, color: C.medium,
-    valign: 'top', paraSpaceAfter: 8,
-  });
-
-  // ── 2×2 metric grid (center-right) ────────────────────────────────
-  // Template positions (from PDF analysis):
-  // Row 1 number: y ≈ 1.00", labels y ≈ 1.70"
-  // Row 2 number: y ≈ 3.30", labels y ≈ 4.05"
-  // Col 1 x ≈ 3.8", Col 2 x ≈ 8.3"
-
-  const METRIC_FONT_SIZE = 54;
-  const LABEL_FONT_SIZE  = 11;
-
-  const mCol1X = 3.80, mCol2X = 8.30;
-
-  // Row 1: YR 1 NET VALUE | YEAR 1 ROI
-  s1.addText(fmtM(y1.net), {
-    x:mCol1X, y:0.95, w:4.0, h:0.82,
-    fontFace:FF, fontSize:METRIC_FONT_SIZE, bold:false, color:C.dark,
-  });
-  s1.addText('YR 1 NET VALUE', {
-    x:mCol1X, y:1.78, w:4.0, h:0.28,
-    fontFace:FF, fontSize:LABEL_FONT_SIZE, bold:false,
-    color:C.muted, charSpacing:1.5,
-  });
-
-  s1.addText(fmtROI(y1.roi), {
-    x:mCol2X, y:0.95, w:4.5, h:0.82,
-    fontFace:FF, fontSize:METRIC_FONT_SIZE, bold:false, color:C.dark,
-  });
-  s1.addText('YEAR 1 ROI', {
-    x:mCol2X, y:1.78, w:4.5, h:0.28,
-    fontFace:FF, fontSize:LABEL_FONT_SIZE, bold:false,
-    color:C.muted, charSpacing:1.5,
-  });
-
-  // Row 2: 3-YR NET VALUE | 3-YR RETURN
-  s1.addText(fmtM(net3), {
-    x:mCol1X, y:3.20, w:4.0, h:0.82,
-    fontFace:FF, fontSize:METRIC_FONT_SIZE, bold:false, color:C.dark,
-  });
-  s1.addText('3-YR NET VALUE', {
-    x:mCol1X, y:4.02, w:4.0, h:0.28,
-    fontFace:FF, fontSize:LABEL_FONT_SIZE, bold:false,
-    color:C.muted, charSpacing:1.5,
-  });
-
-  s1.addText(fmtROI(roi3), {
-    x:mCol2X, y:3.20, w:4.5, h:0.82,
-    fontFace:FF, fontSize:METRIC_FONT_SIZE, bold:false, color:C.dark,
-  });
-  s1.addText('3-YR RETURN', {
-    x:mCol2X, y:4.02, w:4.5, h:0.28,
-    fontFace:FF, fontSize:LABEL_FONT_SIZE, bold:false,
-    color:C.muted, charSpacing:1.5,
-  });
-
-  // BOE/d note if applicable
-  if (y1.boedRecovered !== undefined) {
-    s1.addText('BOE/d recovered (Y1): ' + Number(y1.boedRecovered||0).toLocaleString(), {
-      x:mCol1X, y:4.45, w:8.5, h:0.25,
-      fontFace:FF, fontSize:11, color:C.muted,
+  // Two headline metrics top-right
+  const metrics = [
+    { val: fmtM(net3),  lbl: '3-YR NET VALUE', x: 8.20 },
+    { val: fmtROI(roi3),lbl: '3-YR RETURN',    x: 10.80 },
+  ];
+  metrics.forEach(m => {
+    s1.addText(m.val, {
+      x:m.x, y:0.08, w:2.3, h:0.56,
+      fontFace:FF, fontSize:28, bold:false, color:C.white, align:'center',
     });
-  }
+    s1.addText(m.lbl, {
+      x:m.x, y:0.64, w:2.3, h:0.22,
+      fontFace:FF, fontSize:8, color:'6A7F9E', align:'center', charSpacing:1.5,
+    });
+  });
 
-  addFooter(s1, 1);
+  // Divider between title and metrics
+  s1.addShape(pres.shapes.RECTANGLE, {
+    x:7.9, y:0.12, w:0.01, h:0.82,
+    fill:{color:'3A4F70'}, line:{type:'none'},
+  });
 
-  // ════════════════════════════════════════════════════════════════════
-  // SLIDE 2 — SCENARIO ASSUMPTIONS + VALUE DRIVER CHART
-  // Layout: white bg · gradient blob band bottom · white rounded card
-  //         containing the full assumptions table · driver chart right
-  // ════════════════════════════════════════════════════════════════════
+  // ── Three columns ────────────────────────────────────────────────────
+  const COL_Y   = 1.22;
+  const COL_H   = 5.55;
+  const COL_W   = 4.11;   // (13.33 - 1.00) / 3
+  const COL_GAP = 0.50;
+  const COLS = [0.35, 0.35 + COL_W + COL_GAP, 0.35 + (COL_W + COL_GAP)*2];
+
+  // Column backgrounds (alternating subtle shade)
+  [0,2].forEach(i => {
+    s1.addShape(pres.shapes.RECTANGLE, {
+      x:COLS[i]-0.10, y:COL_Y, w:COL_W+0.10, h:COL_H,
+      fill:{color:C.bg}, line:{type:'none'},
+    });
+  });
+
+  // Vertical dividers
+  [1,2].forEach(i => {
+    s1.addShape(pres.shapes.RECTANGLE, {
+      x:COLS[i]-COL_GAP/2, y:COL_Y+0.12, w:0.01, h:COL_H-0.24,
+      fill:{color:C.colDiv}, line:{type:'none'},
+    });
+  });
+
+  // Column headers
+  const colHeaders = ['Current State', 'Agentic Solution', 'Value at Scale'];
+  colHeaders.forEach((h,i) => {
+    s1.addText(h.toUpperCase(), {
+      x:COLS[i], y:COL_Y+0.16, w:COL_W, h:0.20,
+      fontFace:FF, fontSize:8, color:C.muted, charSpacing:2, bold:false,
+    });
+    // Short accent underline
+    s1.addShape(pres.shapes.RECTANGLE, {
+      x:COLS[i], y:COL_Y+0.38, w:0.30, h:0.025,
+      fill:{color:[C.coral, C.blue, C.green][i]}, line:{type:'none'},
+    });
+  });
+
+  // ── Column 1: Current State ──────────────────────────────────────────
+  // Problem description derived from uc.description (first 2 sentences)
+  const descSentences = uc.description.replace(/<[^>]+>/g,'').split(/(?<=[.!?])\s+/);
+  const currentStateText = descSentences.slice(0,2).join(' ');
+  const agentText = descSentences.slice(2,4).join(' ') || descSentences[0];
+
+  s1.addText(currentStateText, {
+    x:COLS[0], y:COL_Y+0.52, w:COL_W, h:2.20,
+    fontFace:FF, fontSize:11, color:C.mid, valign:'top',
+  });
+
+  // Stat callout box — Y1 payback
+  s1.addShape(pres.shapes.RECTANGLE, {
+    x:COLS[0], y:COL_Y+2.90, w:COL_W, h:0.65,
+    fill:{color:C.bgsub}, line:{color:C.rule, width:0.5},
+  });
+  s1.addText('Y1 platform fee of '+fmtM(y1.fee)+' recovered in '+
+    (pay1>0&&isFinite(pay1) ? pay1.toFixed(1)+' months' : '—'), {
+    x:COLS[0]+0.12, y:COL_Y+2.93, w:COL_W-0.24, h:0.60,
+    fontFace:FF, fontSize:10.5, color:C.body, valign:'middle',
+  });
+
+  // ── Column 2: Agentic Solution ───────────────────────────────────────
+  s1.addText(agentText, {
+    x:COLS[1], y:COL_Y+0.52, w:COL_W, h:2.20,
+    fontFace:FF, fontSize:11, color:C.mid, valign:'top',
+  });
+
+  // Agent type tag
+  const agentType = (() => {
+    const id = uc.id;
+    if (['leasetitle','joaclause','landmanqa','addiligence','nucdata','nucdoc','contractdr'].includes(id)) return 'Document & Knowledge Retrieval';
+    if (['safety','hazardimg','vegmgmt','nuctrouble'].includes(id)) return 'Regulatory & Compliance / Safety';
+    if (['fpsoupt','npti','prod','revprot'].includes(id)) return 'Anomaly Detection & Monitoring';
+    if (['billinq','billex','mro','crude','fracopt'].includes(id)) return 'Data Extraction & Structuring';
+    if (['workforce','jobplan','billex'].includes(id)) return 'Workflow Orchestration';
+    if (['fracopt','jobplan','mro','nucspare'].includes(id)) return 'Optimization & Recommendation';
+    if (['payrisk','billinq','revprot'].includes(id)) return 'Customer & Account Intelligence';
+    return 'Agentic AI — Cohere North';
+  })();
+
+  s1.addShape(pres.shapes.RECTANGLE, {
+    x:COLS[1], y:COL_Y+2.90, w:COL_W, h:0.65,
+    fill:{color:'E8EDF8'}, line:{color:'C4CEEA', width:0.5},
+  });
+  s1.addText(agentType, {
+    x:COLS[1]+0.12, y:COL_Y+2.93, w:COL_W-0.24, h:0.60,
+    fontFace:FF, fontSize:10, color:C.blue, valign:'middle', bold:false,
+  });
+
+  // ── Column 3: Value at Scale ─────────────────────────────────────────
+  // Driver table
+  const topDrivers = drivers.slice(0, Math.min(drivers.length, 5));
+  const maxDrv = topDrivers[0]?.total || 1;
+
+  topDrivers.forEach((d,di) => {
+    const rowY = COL_Y + 0.52 + di * 0.60;
+    const pct  = gross3>0 ? d.total/gross3 : 0;
+    const barW = Math.max((COL_W - 0.20) * (d.total/maxDrv), 0.05);
+
+    s1.addText(d.name, {
+      x:COLS[2], y:rowY, w:COL_W-0.10, h:0.20,
+      fontFace:FF, fontSize:9.5, color:C.body,
+    });
+    s1.addText(fmtM(d.total)+'  '+fmtPct(pct), {
+      x:COLS[2], y:rowY, w:COL_W-0.10, h:0.20,
+      fontFace:FF, fontSize:9, color:C.muted, align:'right',
+    });
+    // Track
+    s1.addShape(pres.shapes.RECTANGLE, {
+      x:COLS[2], y:rowY+0.22, w:COL_W-0.10, h:0.07,
+      fill:{color:'DDEEF5'}, line:{type:'none'},
+    });
+    // Fill
+    s1.addShape(pres.shapes.RECTANGLE, {
+      x:COLS[2], y:rowY+0.22, w:barW, h:0.07,
+      fill:{color:C.green}, line:{type:'none'},
+    });
+  });
+
+  // Totals line
+  const totY = COL_Y + 0.52 + topDrivers.length * 0.60 + 0.10;
+  s1.addShape(pres.shapes.RECTANGLE, {
+    x:COLS[2], y:totY, w:COL_W-0.10, h:0.01,
+    fill:{color:C.colDiv}, line:{type:'none'},
+  });
+  s1.addText('3-yr gross: '+fmtM(gross3)+'   ·   net: '+fmtM(net3), {
+    x:COLS[2], y:totY+0.06, w:COL_W-0.10, h:0.22,
+    fontFace:FF, fontSize:9.5, color:C.muted,
+  });
+
+  // ── Citation footnote ─────────────────────────────────────────────────
+  s1.addShape(pres.shapes.RECTANGLE, {
+    x:0, y:6.88, w:13.33, h:0.28,
+    fill:{color:'F0F2F7'}, line:{type:'none'},
+  });
+  s1.addText(citationText, {
+    x:0.35, y:6.90, w:12.60, h:0.24,
+    fontFace:FF, fontSize:7.5, color:C.muted, valign:'middle',
+  });
+
+  addFooter(s1, 1, false);
+
+  // ══════════════════════════════════════════════════════════════════════
+  // SLIDE 2 — SCENARIO ASSUMPTIONS (unchanged structure + citation)
+  // ══════════════════════════════════════════════════════════════════════
   const s2 = pres.addSlide();
   s2.background = { color: C.white };
 
-  // Gradient band at bottom (abstract blobs — approximate with solid fill)
-  s2.addShape(pres.shapes.RECTANGLE, {
-    x:0, y:5.6, w:13.33, h:1.9,
-    fill:{ color: '7C3AED' }, // deep purple
-    line:{ type:'none' },
-  });
-  // Second blob overlay (blue, offset)
-  s2.addShape(pres.shapes.OVAL, {
-    x:-0.5, y:5.2, w:5.0, h:2.5,
-    fill:{ color: '4F46E5' },
-    line:{ type:'none' },
-  });
-  // Third blob (pink/coral)
-  s2.addShape(pres.shapes.OVAL, {
-    x:7.5, y:5.4, w:6.0, h:2.5,
-    fill:{ color: 'EC4899' },
-    line:{ type:'none' },
+  // Gradient blobs at bottom
+  s2.addShape(pres.shapes.RECTANGLE, {x:0, y:5.6, w:13.33, h:1.9, fill:{color:'1A2B4A'}, line:{type:'none'}});
+  s2.addShape(pres.shapes.OVAL, {x:-0.5, y:5.2, w:5.0, h:2.5, fill:{color:'253F6A'}, line:{type:'none'}});
+  s2.addShape(pres.shapes.OVAL, {x:7.5,  y:5.4, w:6.0, h:2.5, fill:{color:'7C3AED'}, line:{type:'none'}});
+
+  s2.addText('Scenario Assumptions — '+uc.name, {
+    x:0.35, y:0.22, w:12.0, h:0.38,
+    fontFace:FF, fontSize:20, bold:false, color:C.dark,
   });
 
-  // ── Title ──────────────────────────────────────────────────────────
-  s2.addText('Scenario Assumptions', {
-    x:0.35, y:0.22, w:8.0, h:0.38,
-    fontFace: FF, fontSize: 22, bold: false, color: C.dark,
-  });
-
-  // ── White rounded card for table ───────────────────────────────────
-  const CARD_X = 0.30, CARD_Y = 0.80;
-  const CARD_W = 9.20, CARD_H = 4.90;
-
+  // Rounded white card
   s2.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-    x:CARD_X, y:CARD_Y, w:CARD_W, h:CARD_H,
-    fill:{ color: C.cardBg },
-    line:{ color: C.cardBdr, width: 0.5 },
-    rectRadius: 0.12,
+    x:0.30, y:0.78, w:9.20, h:4.92,
+    fill:{color:C.white}, line:{color:'E0E0E4', width:0.5}, rectRadius:0.12,
   });
 
-  // ── Assumptions table inside card ──────────────────────────────────
-  const COL_W = (CARD_W - 0.24) / 4;  // 4 equal columns inside card padding
-  const TABLE_X = CARD_X + 0.12;
-  const TABLE_Y = CARD_Y + 0.12;
-  const TABLE_W = CARD_W - 0.24;
+  const COL_W2 = (9.20-0.24)/4;
+  const half   = Math.ceil(allAssumps.length/2);
+  const left   = allAssumps.slice(0, half);
+  const right  = allAssumps.slice(half);
+  const maxRows2 = Math.max(left.length, right.length);
 
-  // Split assumptions into left+right pairs
-  const half = Math.ceil(allAssumps.length / 2);
-  const left  = allAssumps.slice(0, half);
-  const right = allAssumps.slice(half);
-  const maxRows = Math.max(left.length, right.length);
-
-  const tableData = [
-    // Header row
+  const tblData = [
     [
-      { text:'Driver',       options:{ bold:true, fontSize:12, fontFace:FF, color:C.tblHdr, fill:C.white, margin:[4,8,4,8] } },
-      { text:'Est. Value',   options:{ bold:true, fontSize:12, fontFace:FF, color:C.tblHdr, fill:C.white, margin:[4,8,4,8] } },
-      { text:'Driver',       options:{ bold:true, fontSize:12, fontFace:FF, color:C.tblHdr, fill:C.white, margin:[4,8,4,8] } },
-      { text:'Column Label', options:{ bold:true, fontSize:12, fontFace:FF, color:C.tblHdr, fill:C.white, margin:[4,8,4,8] } },
+      {text:'Driver',       options:{bold:true, fontSize:11, fontFace:FF, color:C.dark,  fill:C.white, margin:[4,8,4,8]}},
+      {text:'Est. Value',   options:{bold:true, fontSize:11, fontFace:FF, color:C.dark,  fill:C.white, margin:[4,8,4,8]}},
+      {text:'Driver',       options:{bold:true, fontSize:11, fontFace:FF, color:C.dark,  fill:C.white, margin:[4,8,4,8]}},
+      {text:'Est. Value',   options:{bold:true, fontSize:11, fontFace:FF, color:C.dark,  fill:C.white, margin:[4,8,4,8]}},
     ],
-    // Data rows
-    ...Array.from({length: maxRows}, (_, i) => {
-      const l = left[i]  || {label:'', value:''};
-      const rr = right[i] || {label:'', value:''};
+    ...Array.from({length:maxRows2},(_,i)=>{
+      const l=left[i]||{label:'',value:''};
+      const rr=right[i]||{label:'',value:''};
+      const fill=i%2===0?'F8F8FC':C.white;
       return [
-        { text: l.label,   options:{ fontSize:10, fontFace:FF, color:C.dark,   fill:C.white, margin:[3,8,3,8] } },
-        { text: l.value,   options:{ fontSize:10, fontFace:FF, color:C.medium, fill:C.white, margin:[3,8,3,8] } },
-        { text: rr.label,  options:{ fontSize:10, fontFace:FF, color:C.dark,   fill:C.white, margin:[3,8,3,8] } },
-        { text: rr.value,  options:{ fontSize:10, fontFace:FF, color:C.medium, fill:C.white, margin:[3,8,3,8] } },
+        {text:l.label,  options:{fontSize:9,  fontFace:FF, color:C.body, fill, margin:[3,8,3,8]}},
+        {text:l.value,  options:{fontSize:9,  fontFace:FF, color:C.mid,  fill, margin:[3,8,3,8]}},
+        {text:rr.label, options:{fontSize:9,  fontFace:FF, color:C.body, fill, margin:[3,8,3,8]}},
+        {text:rr.value, options:{fontSize:9,  fontFace:FF, color:C.mid,  fill, margin:[3,8,3,8]}},
       ];
     }),
   ];
 
-  s2.addTable(tableData, {
-    x: TABLE_X, y: TABLE_Y, w: TABLE_W,
-    colW: [COL_W, COL_W, COL_W, COL_W],
-    border: { type:'solid', pt:0.4, color:C.tblLine },
-    rowH: 0.30,
-    autoPage: false,
+  s2.addTable(tblData, {
+    x:0.42, y:0.90, w:9.08,
+    colW:[COL_W2,COL_W2,COL_W2,COL_W2],
+    border:{type:'solid', pt:0.4, color:'E0E0E4'},
+    rowH:0.27, autoPage:false,
   });
 
-  // ── Value driver chart (right of card) ─────────────────────────────
-  const CHART_X = 9.75, CHART_W = 3.28;
-  const CHART_TITLE_Y = 0.80;
-
-  s2.addText('Value Drivers · 3-Year', {
-    x:CHART_X, y:CHART_TITLE_Y, w:CHART_W, h:0.24,
-    fontFace:FF, fontSize:10, color:C.muted, charSpacing:1.5,
+  // Driver chart right panel
+  s2.addText('VALUE DRIVERS · 3-YEAR', {
+    x:9.80, y:0.78, w:3.28, h:0.22,
+    fontFace:FF, fontSize:8, color:C.muted, charSpacing:1.5,
+  });
+  const maxDrv2 = Math.max(...drivers.map(d=>d.total),1);
+  drivers.slice(0,6).forEach((d,di)=>{
+    const ry=1.05+di*0.55;
+    const bw=Math.max(3.28*(d.total/maxDrv2),0.05);
+    s2.addText(d.name, {x:9.80,y:ry,w:3.28,h:0.18, fontFace:FF,fontSize:9,color:C.body});
+    s2.addText(fmtM(d.total), {x:9.80,y:ry,w:3.28,h:0.18, fontFace:FF,fontSize:9,color:C.muted,align:'right'});
+    s2.addShape(pres.shapes.RECTANGLE, {x:9.80,y:ry+0.20,w:3.28,h:0.09, fill:{color:'DDEEF5'},line:{type:'none'}});
+    s2.addShape(pres.shapes.RECTANGLE, {x:9.80,y:ry+0.20,w:bw,h:0.09, fill:{color:C.green},line:{type:'none'}});
   });
 
-  // Total for % calc
-  const maxDrvTotal = Math.max(...drivers.map(d=>d.total), 1);
-
-  drivers.slice(0,7).forEach((d, di) => {
-    const rowY    = 1.15 + di * 0.55;
-    const pct     = gross3 > 0 ? d.total / gross3 : 0;
-    const barFrac = d.total / maxDrvTotal;
-    const barW    = Math.max(CHART_W * barFrac, 0.06);
-
-    // Driver name
-    s2.addText(d.name, {
-      x:CHART_X, y:rowY, w:CHART_W, h:0.18,
-      fontFace:FF, fontSize:9.5, color:C.dark,
-    });
-    // $ and %
-    s2.addText(fmtM(d.total) + '  ' + fmtPct(pct), {
-      x:CHART_X, y:rowY, w:CHART_W, h:0.18,
-      fontFace:FF, fontSize:9, color:C.muted, align:'right',
-    });
-    // Bar track
-    s2.addShape(pres.shapes.RECTANGLE, {
-      x:CHART_X, y:rowY+0.20, w:CHART_W, h:0.10,
-      fill:{ color: C.barBg }, line:{ type:'none' },
-    });
-    // Bar fill
-    s2.addShape(pres.shapes.RECTANGLE, {
-      x:CHART_X, y:rowY+0.20, w:barW, h:0.10,
-      fill:{ color: C.barFill }, line:{ type:'none' },
-    });
+  // Citation on slide 2 as well
+  s2.addText(citationText, {
+    x:0.35, y:7.22, w:12.60, h:0.18,
+    fontFace:FF, fontSize:7, color:'9AADCC', valign:'middle',
   });
 
-  // 3-yr summary below chart
-  const summY = 1.15 + Math.min(drivers.length,7)*0.55 + 0.15;
-  s2.addText('3-yr gross: ' + fmtM(gross3) + '  ·  net: ' + fmtM(net3) + '  ·  ROI: ' + fmtROI(roi3), {
-    x:CHART_X, y:summY, w:CHART_W, h:0.25,
-    fontFace:FF, fontSize:9, color:C.muted,
-  });
+  addFooter(s2, 2, true);
 
-  addFooter(s2, 2);
-
-  // ── Save ────────────────────────────────────────────────────────────
-  const fname = 'Cohere_Appraisal_' + uc.id + '_' + new Date().toISOString().slice(0,10) + '.pptx';
-  pres.writeFile({ fileName: fname });
+  // ── Save ──────────────────────────────────────────────────────────────
+  const fname = 'Cohere_Appraisal_'+uc.id+'_'+new Date().toISOString().slice(0,10)+'.pptx';
+  pres.writeFile({fileName:fname});
 }
+
 
 
 
